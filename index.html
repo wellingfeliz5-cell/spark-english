@@ -290,6 +290,38 @@
       font-weight: 700;
       letter-spacing: 0.5px;
     }
+
+    /* Sección Phrasal Verbs a reforzar */
+    .wrong-list-container {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .wrong-item {
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .wrong-item-verb {
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .wrong-item-meaning {
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-align: right;
+    }
   </style>
 </head>
 <body>
@@ -343,6 +375,12 @@
           <div class="stat-value" id="wrong-count">0</div>
           <div class="stat-label">Incorrectas</div>
         </div>
+      </div>
+
+      <!-- Sección dinámicamente mostrada si existen errores -->
+      <div id="review-section" style="display: none;">
+        <h3 style="font-size: 1.1rem; color: var(--text); font-weight: 700; margin-bottom: 8px;">Phrasal Verbs a reforzar</h3>
+        <div class="wrong-list-container" id="wrong-list"></div>
       </div>
 
       <button id="restart-btn" class="btn-primary">Jugar de nuevo</button>
@@ -457,6 +495,7 @@
     // Variables de estado del juego
     let targetQuestionCount = 10;
     let selectedQuestions = [];
+    let wrongQuestions = [];
     let currentIndex = 0;
     let correctCount = 0;
     let wrongCount = 0;
@@ -483,6 +522,8 @@
 
     const correctCountDisplay = document.getElementById('correct-count');
     const wrongCountDisplay = document.getElementById('wrong-count');
+    const reviewSection = document.getElementById('review-section');
+    const wrongList = document.getElementById('wrong-list');
 
     // Control de la cantidad de preguntas (De 5 en 5, entre 5 y 100)
     btnMinus.addEventListener('click', () => {
@@ -508,6 +549,7 @@
       currentIndex = 0;
       correctCount = 0;
       wrongCount = 0;
+      wrongQuestions = [];
 
       // Seleccionar preguntas aleatorias de la base de datos
       const shuffled = [...database].sort(() => 0.5 - Math.random());
@@ -580,6 +622,7 @@
       isAnsweringAllowed = false;
       clearInterval(timerInterval);
 
+      const currentQ = selectedQuestions[currentIndex];
       const buttons = optionsContainer.querySelectorAll('.option-btn');
 
       if (isCorrect) {
@@ -588,6 +631,7 @@
       } else {
         selectedBtn.classList.add('wrong');
         wrongCount++;
+        wrongQuestions.push(currentQ);
         // Iluminar en verde la respuesta correcta
         buttons.forEach(btn => {
           if (btn.dataset.isCorrect === 'true') {
@@ -614,7 +658,10 @@
       if (!isAnsweringAllowed) return;
       isAnsweringAllowed = false;
 
+      const currentQ = selectedQuestions[currentIndex];
       wrongCount++;
+      wrongQuestions.push(currentQ);
+
       const buttons = optionsContainer.querySelectorAll('.option-btn');
 
       // Marcar la opción correcta en verde para que la aprenda
@@ -642,6 +689,20 @@
 
       correctCountDisplay.textContent = correctCount;
       wrongCountDisplay.textContent = wrongCount;
+
+      // Desplegar lista de Phrasal Verbs a reforzar si hubo fallos
+      if (wrongQuestions.length > 0) {
+        reviewSection.style.display = 'block';
+        wrongList.innerHTML = wrongQuestions.map(item => `
+          <div class="wrong-item">
+            <span class="wrong-item-verb">${item.verb}</span>
+            <span class="wrong-item-meaning">${item.meaning}</span>
+          </div>
+        `).join('');
+      } else {
+        reviewSection.style.display = 'none';
+        wrongList.innerHTML = '';
+      }
     }
 
     function resetToStart() {
