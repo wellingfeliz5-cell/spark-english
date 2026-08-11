@@ -98,10 +98,13 @@
       height: 50px;
       cursor: pointer;
       transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .stepper button:hover {
-      background-color: #e2e8f0;
+    @media (hover: hover) {
+      .stepper button:hover {
+        background-color: #e2e8f0;
+      }
     }
 
     .stepper span {
@@ -123,10 +126,13 @@
       cursor: pointer;
       transition: background-color 0.2s;
       width: 100%;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .btn-primary:hover {
-      background-color: var(--accent-hover);
+    @media (hover: hover) {
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+      }
     }
 
     .btn-danger {
@@ -139,11 +145,14 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .btn-danger:hover {
-      background-color: #fee2e2;
-      color: #b91c1c;
+    @media (hover: hover) {
+      .btn-danger:hover {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
     }
 
     /* Interfaz de Juego */
@@ -210,11 +219,15 @@
       align-items: center;
       gap: 12px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
     }
 
-    .option-btn:hover:not(:disabled) {
-      border-color: var(--accent);
-      background-color: #f5f3ff;
+    @media (hover: hover) {
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background-color: #f5f3ff;
+      }
     }
 
     .option-btn .label {
