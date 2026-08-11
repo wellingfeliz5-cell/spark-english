@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connectors and Preposition Quiz</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #7c3aed;
+      --accent-hover: #6d28d9;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --correct: #10b981;
+      --correct-bg: #ecfdf5;
+      --wrong: #ef4444;
+      --wrong-bg: #fef2f2;
+      --border: #e2e8f0;
+      --timer-bg: #fee2e2;
+      --timer-text: #dc2626;
+      --tag-text: #6d28d9;
+      --tag-bg: #f3e8ff;
+      --option-hover-bg: #faf5ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 550px;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* Selector de Preguntas */
+    .selector-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      background-color: #f1f5f9;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .stepper button {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .stepper button:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    .stepper span {
+      font-size: 1.4rem;
+      font-weight: 600;
+      width: 70px;
+      text-align: center;
+    }
+
+    /* Botones generales */
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+      }
+    }
+
+    .btn-danger {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-danger:hover {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+    }
+
+    /* Interfaz de Juego */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+
+    .progress {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .timer-badge {
+      background-color: var(--timer-bg);
+      color: var(--timer-text);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #fca5a5;
+    }
+
+    .word-box {
+      text-align: center;
+      padding: 24px 10px;
+      background-color: #f8fafc;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+    }
+
+    .phrasal-verb {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background-color: var(--option-hover-bg);
+      }
+    }
+
+    .option-btn .label {
+      font-weight: 700;
+      color: var(--tag-text);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background-color: var(--tag-bg);
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .option-btn.correct {
+      background-color: var(--correct-bg) !important;
+      border-color: var(--correct) !important;
+      color: #065f46 !important;
+      font-weight: 600;
+    }
+
+    .option-btn.correct .label {
+      background-color: var(--correct);
+      color: white;
+    }
+
+    .option-btn.wrong {
+      background-color: var(--wrong-bg) !important;
+      border-color: var(--wrong) !important;
+      color: #991b1b !important;
+      font-weight: 600;
+    }
+
+    .option-btn.wrong .label {
+      background-color: var(--wrong);
+      color: white;
+    }
+
+    .option-btn.blink-red {
+      animation: blinkRed 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRed {
+      0%, 100% {
+        background-color: #ffffff;
+        border-color: var(--border);
+        color: var(--text);
+      }
+      50% {
+        background-color: var(--wrong-bg);
+        border-color: var(--wrong);
+        color: #991b1b;
+      }
+    }
+
+    .option-btn.blink-red .label {
+      animation: blinkRedLabel 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRedLabel {
+      0%, 100% {
+        background-color: var(--tag-bg);
+        color: var(--tag-text);
+      }
+      50% {
+        background-color: var(--wrong);
+        color: white;
+      }
+    }
+
+    /* Pantalla Final */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .stat-card {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card.correct-card { border-color: #a7f3d0; background-color: #ecfdf5; }
+    .stat-card.wrong-card { border-color: #fca5a5; background-color: #fef2f2; }
+
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .correct-card .stat-value { color: var(--correct); }
+    .wrong-card .stat-value { color: var(--wrong); }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Sección Phrasal Verbs a reforzar */
+    .wrong-list-container {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .wrong-item {
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .wrong-item-verb {
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .wrong-item-meaning {
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 1. PANTALLA INICIAL -->
+    <div id="start-screen" class="screen active">
+      <h1>Connectors and Prepositions Quiz!</h1>
+      <p class="subtitle">✨ Aprende y pon a prueba tu vocabulario en inglés ✨</p>
+      
+      <div class="selector-group">
+        <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">¿Cuántas preguntas deseas responder?</label>
+        <div class="stepper">
+          <button id="btn-minus">-</button>
+          <span id="question-count">10</span>
+          <button id="btn-plus">+</button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary">¡Comenzar Juego!</button>
+    </div>
+
+    <!-- 2. PANTALLA DEL JUEGO -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <span class="progress" id="progress-text">Pregunta 1 de 10</span>
+        <div class="timer-badge">⏱️ <span id="timer-text">30s</span></div>
+        <button id="finish-btn" class="btn-danger">Finalizar</button>
+      </div>
+
+      <div class="word-box">
+        <div class="phrasal-verb" id="phrasal-verb-display">Ask for</div>
+      </div>
+
+      <div class="options-list" id="options-container">
+        <!-- Las opciones a, b, c se generarán dinámicamente -->
+      </div>
+    </div>
+
+    <!-- 3. PANTALLA DE RESULTADOS -->
+    <div id="end-screen" class="screen">
+      <h1>¡Juego Terminado!</h1>
+      <p class="subtitle" id="final-status-text">Aquí tienes el resumen de tu partida:</p>
+
+      <div class="results-grid">
+        <div class="stat-card correct-card">
+          <div class="stat-value" id="correct-count">0</div>
+          <div class="stat-label">Correctas</div>
+        </div>
+        <div class="stat-card wrong-card">
+          <div class="stat-value" id="wrong-count">0</div>
+          <div class="stat-label">Incorrectas</div>
+        </div>
+      </div>
+
+      <!-- Sección dinámicamente mostrada si existen errores -->
+      <div id="review-section" style="display: none;">
+        <h3 style="font-size: 1.1rem; color: var(--text); font-weight: 700; margin-bottom: 8px;">Connectors and Prepositions to reinforce:</h3>
+        <div class="wrong-list-container" id="wrong-list"></div>
+      </div>
+
+      <button id="restart-btn" class="btn-primary">Jugar de nuevo</button>
+    </div>
+  </div>
+
+  <script>
+    // Base de datos actualizada con Conectores y Preposiciones
+    const database = [
+      { verb: "About", meaning: "Acerca de / Sobre" },
+      { verb: "Above", meaning: "Por encima de / Sobre" },
+      { verb: "According to", meaning: "Según / De acuerdo con" },
+      { verb: "Across", meaning: "A través de / Al otro lado de" },
+      { verb: "After", meaning: "Después de" },
+      { verb: "Against", meaning: "En contra de" },
+      { verb: "Along", meaning: "A lo largo de" },
+      { verb: "Along with", meaning: "Junto con" },
+      { verb: "Alongside", meaning: "Junto a" },
+      { verb: "Although", meaning: "Aunque" },
+      { verb: "Among", meaning: "Entre (varios)" },
+      { verb: "And", meaning: "Y" },
+      { verb: "Apart from", meaning: "Aparte de" },
+      { verb: "Around", meaning: "Alrededor de" },
+      { verb: "As", meaning: "Como / Ya que" },
+      { verb: "As a result", meaning: "Como resultado" },
+      { verb: "As long as", meaning: "Siempre que / Mientras que" },
+      { verb: "As well as", meaning: "Así como / Además de" },
+      { verb: "At", meaning: "En" },
+      { verb: "Because", meaning: "Porque" },
+      { verb: "Because of", meaning: "Debido a" },
+      { verb: "Before", meaning: "Antes de" },
+      { verb: "Behind", meaning: "Detrás de" },
+      { verb: "Below", meaning: "Debajo de" },
+      { verb: "Beneath", meaning: "Por debajo de / Bajo" },
+      { verb: "Beside", meaning: "Al lado de" },
+      { verb: "Besides", meaning: "Además de" },
+      { verb: "Between", meaning: "Entre (dos)" },
+      { verb: "Beyond", meaning: "Más allá de" },
+      { verb: "But", meaning: "Pero" },
+      { verb: "By", meaning: "Por / Cerca de" },
+      { verb: "By means of", meaning: "Por medio de" },
+      { verb: "Despite", meaning: "A pesar de" },
+      { verb: "Down", meaning: "Abajo / Hacia abajo" },
+      { verb: "Due to", meaning: "Debido a" },
+      { verb: "During", meaning: "Durante" },
+      { verb: "Either... or", meaning: "O... o" },
+      { verb: "Even if", meaning: "Incluso si" },
+      { verb: "Even though", meaning: "Aunque / A pesar de que" },
+      { verb: "Except", meaning: "Excepto" },
+      { verb: "Except for", meaning: "Salvo por / Excepto" },
+      { verb: "For", meaning: "Para / Por" },
+      { verb: "For example", meaning: "Por ejemplo" },
+      { verb: "For instance", meaning: "Por ejemplo" },
+      { verb: "From", meaning: "De / Desde" },
+      { verb: "Furthermore", meaning: "Además" },
+      { verb: "However", meaning: "Sin embargo" },
+      { verb: "In", meaning: "En" },
+      { verb: "In addition", meaning: "Además" },
+      { verb: "In addition to", meaning: "Además de" },
+      { verb: "In case", meaning: "En caso de que" },
+      { verb: "In front of", meaning: "Delante de" },
+      { verb: "In order to", meaning: "Para / Con el fin de" },
+      { verb: "In spite of", meaning: "A pesar de" },
+      { verb: "Inside", meaning: "Dentro de" },
+      { verb: "Instead of", meaning: "En lugar de" },
+      { verb: "Into", meaning: "En / Hacia el interior" },
+      { verb: "Like", meaning: "Como" },
+      { verb: "Meanwhile", meaning: "Mientras tanto" },
+      { verb: "Near", meaning: "Cerca de" },
+      { verb: "Neither... nor", meaning: "Ni... ni" },
+      { verb: "Nevertheless", meaning: "Sin embargo / No obstante" },
+      { verb: "Next to", meaning: "Al lado de" },
+      { verb: "Nonetheless", meaning: "Sin embargo" },
+      { verb: "Nor", meaning: "Ni" },
+      { verb: "Not only... but also", meaning: "No solo... sino también" },
+      { verb: "Off", meaning: "Fuera de / De" },
+      { verb: "On", meaning: "En / Sobre" },
+      { verb: "On account of", meaning: "A causa de" },
+      { verb: "On behalf of", meaning: "En nombre de" },
+      { verb: "On the other hand", meaning: "Por otro lado" },
+      { verb: "Onto", meaning: "Sobre / Hacia arriba de" },
+      { verb: "Opposite", meaning: "Enfrente de" },
+      { verb: "Or", meaning: "O" },
+      { verb: "Otherwise", meaning: "De lo contrario" },
+      { verb: "Out of", meaning: "Fuera de" },
+      { verb: "Outside", meaning: "Fuera de" },
+      { verb: "Over", meaning: "Sobre / Por encima de" },
+      { verb: "Past", meaning: "Más allá de / Pasando" },
+      { verb: "Provided that", meaning: "Siempre y cuando" },
+      { verb: "Regarding", meaning: "Respecto a / En cuanto a" },
+      { verb: "Since", meaning: "Desde / Ya que" },
+      { verb: "So", meaning: "Así que / Por lo tanto" },
+      { verb: "So that", meaning: "Para que" },
+      { verb: "Still", meaning: "Aún / Sin embargo" },
+      { verb: "Than", meaning: "Que (comparativo)" },
+      { verb: "Therefore", meaning: "Por lo tanto" },
+      { verb: "Though", meaning: "Aunque" },
+      { verb: "Through", meaning: "A través de" },
+      { verb: "Throughout", meaning: "A lo largo de / Por todo" },
+      { verb: "Till", meaning: "Hasta" },
+      { verb: "To", meaning: "A / Hacia / Para" },
+      { verb: "Toward", meaning: "Hacia" },
+      { verb: "Under", meaning: "Debajo de" },
+      { verb: "Underneath", meaning: "Debajo de" },
+      { verb: "Unless", meaning: "A menos que" },
+      { verb: "Until", meaning: "Hasta" },
+      { verb: "Up", meaning: "Arriba / Hacia arriba" },
+      { verb: "Upon", meaning: "Sobre / Al" },
+      { verb: "With", meaning: "Con" }
+    ];
+
+    // Variables de estado del juego
+    let targetQuestionCount = 10;
+    let selectedQuestions = [];
+    let wrongQuestions = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let isAnsweringAllowed = true;
+    let timerInterval = null;
+    let timeLeft = 30;
+
+    // Elementos del DOM
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreen = document.getElementById('end-screen');
+
+    const questionCountDisplay = document.getElementById('question-count');
+    const btnMinus = document.getElementById('btn-minus');
+    const btnPlus = document.getElementById('btn-plus');
+    const startBtn = document.getElementById('start-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const restartBtn = document.getElementById('restart-btn');
+
+    const progressText = document.getElementById('progress-text');
+    const timerText = document.getElementById('timer-text');
+    const verbDisplay = document.getElementById('phrasal-verb-display');
+    const optionsContainer = document.getElementById('options-container');
+
+    const correctCountDisplay = document.getElementById('correct-count');
+    const wrongCountDisplay = document.getElementById('wrong-count');
+    const reviewSection = document.getElementById('review-section');
+    const wrongList = document.getElementById('wrong-list');
+
+    // Control de la cantidad de preguntas (De 5 en 5, entre 5 y 100)
+    btnMinus.addEventListener('click', () => {
+      if (targetQuestionCount > 5) {
+        targetQuestionCount -= 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    btnPlus.addEventListener('click', () => {
+      if (targetQuestionCount < 100) {
+        targetQuestionCount += 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    // Iniciar Juego
+    startBtn.addEventListener('click', startGame);
+    finishBtn.addEventListener('click', endGame);
+    restartBtn.addEventListener('click', resetToStart);
+
+    function startGame() {
+      currentIndex = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      wrongQuestions = [];
+
+      // Seleccionar preguntas aleatorias de la base de datos
+      const shuffled = [...database].sort(() => 0.5 - Math.random());
+      selectedQuestions = shuffled.slice(0, targetQuestionCount);
+
+      startScreen.classList.remove('active');
+      gameScreen.classList.add('active');
+
+      renderQuestion();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 15;
+      timerText.textContent = `${timeLeft}s`;
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerText.textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      isAnsweringAllowed = true;
+      const currentQ = selectedQuestions[currentIndex];
+
+      progressText.textContent = `Pregunta ${currentIndex + 1} de ${selectedQuestions.length}`;
+      verbDisplay.textContent = currentQ.verb;
+      optionsContainer.innerHTML = '';
+
+      // Generar 2 distractoras únicas
+      const distractors = database
+        .filter(item => item.verb !== currentQ.verb)
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 2);
+
+      // Crear las 3 opciones (A, B, C) y desordenarlas
+      const optionsData = [
+        { text: currentQ.meaning, isCorrect: true },
+        { text: distractors[0].meaning, isCorrect: false },
+        { text: distractors[1].meaning, isCorrect: false }
+      ].sort(() => 0.5 - Math.random());
+
+      const labels = ['a', 'b', 'c'];
+
+      optionsData.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.classList.add('option-btn');
+        btn.dataset.isCorrect = opt.isCorrect;
+
+        btn.innerHTML = `
+          <span class="label">${labels[idx]}</span>
+          <span>${opt.text}</span>
+        `;
+
+        btn.addEventListener('click', () => handleAnswer(btn, opt.isCorrect));
+        optionsContainer.appendChild(btn);
+      });
+
+      startTimer();
+    }
+
+    function handleAnswer(selectedBtn, isCorrect) {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+      clearInterval(timerInterval);
+
+      const currentQ = selectedQuestions[currentIndex];
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+      if (isCorrect) {
+        selectedBtn.classList.add('correct');
+        correctCount++;
+      } else {
+        selectedBtn.classList.add('wrong');
+        wrongCount++;
+        wrongQuestions.push(currentQ);
+        // Iluminar en verde la respuesta correcta si se respondió mal
+        buttons.forEach(btn => {
+          if (btn.dataset.isCorrect === 'true') {
+            btn.classList.add('correct');
+          }
+        });
+      }
+
+      // Deshabilitar todos los botones durante la transición
+      buttons.forEach(btn => btn.disabled = true);
+
+      // Siguiente pregunta después de 1.2 segundos
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1200);
+    }
+
+    function handleTimeout() {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+
+      const currentQ = selectedQuestions[currentIndex];
+      wrongCount++;
+      wrongQuestions.push(currentQ);
+
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+      // Deshabilitar todos los botones y hacer parpadear en rojo ÚNICAMENTE la respuesta correcta
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.isCorrect === 'true') {
+          btn.classList.add('blink-red');
+        }
+      });
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1200);
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      gameScreen.classList.remove('active');
+      endScreen.classList.add('active');
+
+      correctCountDisplay.textContent = correctCount;
+      wrongCountDisplay.textContent = wrongCount;
+
+      // Desplegar lista de Phrasal Verbs a reforzar si hubo fallos
+      if (wrongQuestions.length > 0) {
+        reviewSection.style.display = 'block';
+        wrongList.innerHTML = wrongQuestions.map(item => `
+          <div class="wrong-item">
+            <span class="wrong-item-verb">${item.verb}</span>
+            <span class="wrong-item-meaning">${item.meaning}</span>
+          </div>
+        `).join('');
+      } else {
+        reviewSection.style.display = 'none';
+        wrongList.innerHTML = '';
+      }
+    }
+
+    function resetToStart() {
+      clearInterval(timerInterval);
+      endScreen.classList.remove('active');
+      startScreen.classList.add('active');
+    }
+  </script>
+</body>
+</html>

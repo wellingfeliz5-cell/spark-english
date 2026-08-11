@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selección de Vocabulario</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 550px;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .header {
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--text);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    p.subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .categories-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .category-card {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .category-card:hover {
+        border-color: var(--accent);
+        background-color: #f5f3ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+      }
+    }
+
+    .category-card:active {
+      transform: translateY(0);
+    }
+
+    .icon-box {
+      font-size: 2rem;
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f1f5f9;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .category-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex-grow: 1;
+    }
+
+    .category-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .category-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .arrow {
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      font-weight: 700;
+      transition: transform 0.2s, color 0.2s;
+    }
+
+    .category-card:hover .arrow {
+      color: var(--accent);
+      transform: translateX(4px);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Vocabulario 📚</h1>
+      <p class="subtitle">Selecciona una categoría para empezar a practicar</p>
+    </div>
+
+    <div class="categories-grid">
+      <!-- Rutina y hogar -->
+      <a href="v-rutina-hogar.html" class="category-card">
+        <div class="icon-box">🏠</div>
+        <div class="category-info">
+          <span class="category-title">Rutina y hogar</span>
+          <span class="category-desc">Familia, ropa y comida</span>
+        </div>
+        <span class="arrow">➔</span>
+      </a>
+
+      <!-- Entorno -->
+      <a href="v-entorno.html" class="category-card">
+        <div class="icon-box">🧠</div>
+        <div class="category-info">
+          <span class="category-title">Entorno</span>
+          <span class="category-desc">Partes del cuerpo y material escolar</span>
+        </div>
+        <span class="arrow">➔</span>
+      </a>
+
+      <!-- Movimiento -->
+      <a href="v-movimiento.html" class="category-card">
+        <div class="icon-box">✈️</div>
+        <div class="category-info">
+          <span class="category-title">Movimiento</span>
+          <span class="category-desc">Viajes, clima y ciudad</span>
+        </div>
+        <span class="arrow">➔</span>
+      </a>
+
+      <!-- Animales -->
+      <a href="v-animals.html" class="category-card">
+        <div class="icon-box">🦁</div>
+        <div class="category-info">
+          <span class="category-title">Animales</span>
+          <span class="category-desc">Fauna doméstica y salvaje</span>
+        </div>
+        <span class="arrow">➔</span>
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>

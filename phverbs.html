@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phrasal Verbs Quiz</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #ea580c;
+      --accent-hover: #c2410c;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --correct: #10b981;
+      --correct-bg: #ecfdf5;
+      --wrong: #ef4444;
+      --wrong-bg: #fef2f2;
+      --border: #e2e8f0;
+      --timer-bg: #fee2e2;
+      --timer-text: #dc2626;
+      --tag-text: #c2410c;
+      --tag-bg: #ffedd5;
+      --option-hover-bg: #fff7ed;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 550px;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* Selector de Preguntas */
+    .selector-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      background-color: #f1f5f9;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .stepper button {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .stepper button:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    .stepper span {
+      font-size: 1.4rem;
+      font-weight: 600;
+      width: 70px;
+      text-align: center;
+    }
+
+    /* Botones generales */
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+      }
+    }
+
+    .btn-danger {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-danger:hover {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+    }
+
+    /* Interfaz de Juego */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+
+    .progress {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .timer-badge {
+      background-color: var(--timer-bg);
+      color: var(--timer-text);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #fca5a5;
+    }
+
+    .word-box {
+      text-align: center;
+      padding: 24px 10px;
+      background-color: #f8fafc;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+    }
+
+    .phrasal-verb {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background-color: var(--option-hover-bg);
+      }
+    }
+
+    .option-btn .label {
+      font-weight: 700;
+      color: var(--tag-text);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background-color: var(--tag-bg);
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .option-btn.correct {
+      background-color: var(--correct-bg) !important;
+      border-color: var(--correct) !important;
+      color: #065f46 !important;
+      font-weight: 600;
+    }
+
+    .option-btn.correct .label {
+      background-color: var(--correct);
+      color: white;
+    }
+
+    .option-btn.wrong {
+      background-color: var(--wrong-bg) !important;
+      border-color: var(--wrong) !important;
+      color: #991b1b !important;
+      font-weight: 600;
+    }
+
+    .option-btn.wrong .label {
+      background-color: var(--wrong);
+      color: white;
+    }
+
+    .option-btn.blink-red {
+      animation: blinkRed 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRed {
+      0%, 100% {
+        background-color: #ffffff;
+        border-color: var(--border);
+        color: var(--text);
+      }
+      50% {
+        background-color: var(--wrong-bg);
+        border-color: var(--wrong);
+        color: #991b1b;
+      }
+    }
+
+    .option-btn.blink-red .label {
+      animation: blinkRedLabel 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRedLabel {
+      0%, 100% {
+        background-color: var(--tag-bg);
+        color: var(--tag-text);
+      }
+      50% {
+        background-color: var(--wrong);
+        color: white;
+      }
+    }
+
+    /* Pantalla Final */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .stat-card {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card.correct-card { border-color: #a7f3d0; background-color: #ecfdf5; }
+    .stat-card.wrong-card { border-color: #fca5a5; background-color: #fef2f2; }
+
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .correct-card .stat-value { color: var(--correct); }
+    .wrong-card .stat-value { color: var(--wrong); }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Sección Phrasal Verbs a reforzar */
+    .wrong-list-container {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .wrong-item {
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .wrong-item-verb {
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .wrong-item-meaning {
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 1. PANTALLA INICIAL -->
+    <div id="start-screen" class="screen active">
+      <h1>Phrasal Verbs Quiz!</h1>
+      <p class="subtitle">✨ Aprende y pon a prueba tu vocabulario en inglés ✨</p>
+      
+      <div class="selector-group">
+        <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">¿Cuántas preguntas deseas responder?</label>
+        <div class="stepper">
+          <button id="btn-minus">-</button>
+          <span id="question-count">10</span>
+          <button id="btn-plus">+</button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary">¡Comenzar Juego!</button>
+    </div>
+
+    <!-- 2. PANTALLA DEL JUEGO -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <span class="progress" id="progress-text">Pregunta 1 de 10</span>
+        <div class="timer-badge">⏱️ <span id="timer-text">30s</span></div>
+        <button id="finish-btn" class="btn-danger">Finalizar</button>
+      </div>
+
+      <div class="word-box">
+        <div class="phrasal-verb" id="phrasal-verb-display">Ask for</div>
+      </div>
+
+      <div class="options-list" id="options-container">
+        <!-- Las opciones a, b, c se generarán dinámicamente -->
+      </div>
+    </div>
+
+    <!-- 3. PANTALLA DE RESULTADOS -->
+    <div id="end-screen" class="screen">
+      <h1>¡Juego Terminado!</h1>
+      <p class="subtitle" id="final-status-text">Aquí tienes el resumen de tu partida:</p>
+
+      <div class="results-grid">
+        <div class="stat-card correct-card">
+          <div class="stat-value" id="correct-count">0</div>
+          <div class="stat-label">Correctas</div>
+        </div>
+        <div class="stat-card wrong-card">
+          <div class="stat-value" id="wrong-count">0</div>
+          <div class="stat-label">Incorrectas</div>
+        </div>
+      </div>
+
+      <!-- Sección dinámicamente mostrada si existen errores -->
+      <div id="review-section" style="display: none;">
+        <h3 style="font-size: 1.1rem; color: var(--text); font-weight: 700; margin-bottom: 8px;">Phrasal Verbs to reinforce:</h3>
+        <div class="wrong-list-container" id="wrong-list"></div>
+      </div>
+
+      <button id="restart-btn" class="btn-primary">Jugar de nuevo</button>
+    </div>
+  </div>
+
+  <script>
+    // Base de datos completa con los 100 Phrasal Verbs
+    const database = [
+      { verb: "Ask for", meaning: "Pedir / Solicitar" },
+      { verb: "Back up", meaning: "Apoyar / Hacer una copia de seguridad / Dar marcha atrás" },
+      { verb: "Blow up", meaning: "Explotar / Volar en pedazos / Enfadarse repentinamente" },
+      { verb: "Break down", meaning: "Averiarse (máquina) / Colapsar emocionalmente" },
+      { verb: "Break in / Into", meaning: "Entrar por la fuerza / Interrumpir" },
+      { verb: "Break out", meaning: "Estallar (guerra, epidemia) / Escapar" },
+      { verb: "Break up", meaning: "Terminar una relación / Romperse en pedazos" },
+      { verb: "Bring up", meaning: "Criar (a un hijo) / Mencionar un tema" },
+      { verb: "Call off", meaning: "Cancelar" },
+      { verb: "Call back", meaning: "Devolver una llamada" },
+      { verb: "Calm down", meaning: "Calmarse / Tranquilizarse" },
+      { verb: "Carry on", meaning: "Continuar / Seguir adelante" },
+      { verb: "Carry out", meaning: "Llevar a cabo / Realizar (un trabajo o experimento)" },
+      { verb: "Catch up (with)", meaning: "Ponerse al día / Alcanzar a alguien" },
+      { verb: "Check in", meaning: "Registrarse (en un hotel o aeropuerto)" },
+      { verb: "Check out", meaning: "Pagar e irse / Comprobar o examinar algo" },
+      { verb: "Cheer up", meaning: "Animar / Animarse" },
+      { verb: "Clean up", meaning: "Limpiar a fondo" },
+      { verb: "Come across", meaning: "Encontrar por casualidad" },
+      { verb: "Come back", meaning: "Regresar / Volver" },
+      { verb: "Come in", meaning: "Entrar" },
+      { verb: "Come on", meaning: "¡Vamos! / Apurarse" },
+      { verb: "Come out", meaning: "Salir (a la venta, al mercado) / Revelarse" },
+      { verb: "Come up (with)", meaning: "Surgir (un problema) / Proponer (una idea)" },
+      { verb: "Count on", meaning: "Contar con (alguien)" },
+      { verb: "Cut down (on)", meaning: "Reducir el consumo de algo" },
+      { verb: "Cut off", meaning: "Interrumpir / Cortar (un suministro o llamada)" },
+      { verb: "Cut out", meaning: "Dejar de hacer algo / Recortar" },
+      { verb: "Deal with", meaning: "Tratar con / Lidiar con" },
+      { verb: "Do over", meaning: "Rehacer / Volver a hacer" },
+      { verb: "Dress up", meaning: "Vestirse elegante / Disfrazarse" },
+      { verb: "Drop by / In", meaning: "Pasar a visitar sin avisar" },
+      { verb: "Drop off", meaning: "Dejar a alguien/algo en un lugar / Quedarse dormido" },
+      { verb: "Drop out", meaning: "Abandonar (estudios o una competencia)" },
+      { verb: "End up", meaning: "Terminar o acabar en cierta situación o lugar" },
+      { verb: "Fall apart", meaning: "Desmoronarse / Romperse en pedazos" },
+      { verb: "Fall for", meaning: "Enamorarse de / Caer en un engaño" },
+      { verb: "Figure out", meaning: "Descifrar / Entender / Resolver" },
+      { verb: "Fill in / Out", meaning: "Rellenar (un formulario)" },
+      { verb: "Find out", meaning: "Descubrir / Enterarse de algo" },
+      { verb: "Get along (with)", meaning: "Llevarse bien (con alguien)" },
+      { verb: "Get away", meaning: "Escapar / Irse de vacaciones" },
+      { verb: "Get back", meaning: "Volver / Recuperar algo" },
+      { verb: "Get by", meaning: "Arreglárselas / Sobrevivir económicamente" },
+      { verb: "Get in / Into", meaning: "Entrar (a un vehículo pequeño, edificio o lugar)" },
+      { verb: "Get off", meaning: "Bajarse (de autobús, tren, avión) / Salir del trabajo" },
+      { verb: "Get on", meaning: "Subirse (a un autobús, tren, avión) / Llevarse bien" },
+      { verb: "Get out", meaning: "Salir / Escapar" },
+      { verb: "Get over", meaning: "Superar (una enfermedad o ruptura)" },
+      { verb: "Get through", meaning: "Progresar / Comunicarse por teléfono con alguien" },
+      { verb: "Get up", meaning: "Levantarse (de la cama)" },
+      { verb: "Give away", meaning: "Regalar / Revelar un secreto" },
+      { verb: "Give back", meaning: "Devolver algo" },
+      { verb: "Give in", meaning: "Ceder / Rendirse" },
+      { verb: "Give up", meaning: "Rendirse / Dejar un hábito (ej. fumar)" },
+      { verb: "Go ahead", meaning: "Proceder / Adelante" },
+      { verb: "Go back", meaning: "Regresar / Volver" },
+      { verb: "Go off", meaning: "Explotar / Sonar (alarma) / Estropearse (comida)" },
+      { verb: "Go on", meaning: "Continuar / Ocurrir" },
+      { verb: "Go out", meaning: "Salir (de fiesta) / Apagarse (fuego, luz)" },
+      { verb: "Go over", meaning: "Revisar / Repasar" },
+      { verb: "Go through", meaning: "Pasar por / Atravesar una situación difícil" },
+      { verb: "Grow up", meaning: "Crecer / Volverse adulto" },
+      { verb: "Hang on", meaning: "Esperar un momento" },
+      { verb: "Hang out", meaning: "Pasar el rato / Salir con amigos" },
+      { verb: "Hang up", meaning: "Colgar el teléfono" },
+      { verb: "Hold on", meaning: "Esperar / Aguantar" },
+      { verb: "Keep on", meaning: "Continuar / Seguir haciendo algo" },
+      { verb: "Keep up (with)", meaning: "Mantener el ritmo / Estar al día" },
+      { verb: "Let down", meaning: "Decepcionar" },
+      { verb: "Let in", meaning: "Dejar entrar" },
+      { verb: "Look after", meaning: "Cuidar de alguien o algo" },
+      { verb: "Look for", meaning: "Buscar" },
+      { verb: "Look forward to", meaning: "Esperar con ansias algo" },
+      { verb: "Look into", meaning: "Investigar" },
+      { verb: "Look out", meaning: "Tener cuidado / Prestar atención" },
+      { verb: "Look up", meaning: "Buscar información (en un diccionario o internet)" },
+      { verb: "Make up", meaning: "Inventar (una historia) / Reconciliarse / Maquillarse" },
+      { verb: "Pass away", meaning: "Fallecer" },
+      { verb: "Pass out", meaning: "Desmayarse" },
+      { verb: "Pay back", meaning: "Devolver dinero" },
+      { verb: "Pick up", meaning: "Recoger / Levantar / Contestar el teléfono" },
+      { verb: "Point out", meaning: "Señalar / Destacar un dato" },
+      { verb: "Put away", meaning: "Guardar en su sitio" },
+      { verb: "Put off", meaning: "Posponer / Postergar" },
+      { verb: "Put on", meaning: "Ponerse (ropa) / Encender (aparatos)" },
+      { verb: "Put out", meaning: "Apagar (fuego o cigarrillo)" },
+      { verb: "Run into", meaning: "Encontrarse con alguien por casualidad" },
+      { verb: "Run out (of)", meaning: "Quedarse sin algo (dinero, tiempo, gasolina)" },
+      { verb: "Set up", meaning: "Configurar / Organizar / Establecer un negocio" },
+      { verb: "Show up", meaning: "Aparecer / Llegar a un lugar" },
+      { verb: "Shut down", meaning: "Apagar (una computadora) / Cerrar (un negocio)" },
+      { verb: "Sit down", meaning: "Sentarse" },
+      { verb: "Stand up", meaning: "Ponerse de pie" },
+      { verb: "Take after", meaning: "Parecerse a un familiar" },
+      { verb: "Take off", meaning: "Despegar (avión) / Quitarse (ropa) / Tener éxito rápido" },
+      { verb: "Take out", meaning: "Sacar (la basura, a pasear) / Quitar" },
+      { verb: "Throw away", meaning: "Tirar a la basura / Desechar" },
+      { verb: "Turn down", meaning: "Rechazar (una oferta) / Bajar el volumen" },
+      { verb: "Turn on / Off", meaning: "Encender / Apagar (dispositivos electrónicos)" }
+    ];
+
+    // Variables de estado del juego
+    let targetQuestionCount = 10;
+    let selectedQuestions = [];
+    let wrongQuestions = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let isAnsweringAllowed = true;
+    let timerInterval = null;
+    let timeLeft = 30;
+
+    // Elementos del DOM
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreen = document.getElementById('end-screen');
+
+    const questionCountDisplay = document.getElementById('question-count');
+    const btnMinus = document.getElementById('btn-minus');
+    const btnPlus = document.getElementById('btn-plus');
+    const startBtn = document.getElementById('start-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const restartBtn = document.getElementById('restart-btn');
+
+    const progressText = document.getElementById('progress-text');
+    const timerText = document.getElementById('timer-text');
+    const verbDisplay = document.getElementById('phrasal-verb-display');
+    const optionsContainer = document.getElementById('options-container');
+
+    const correctCountDisplay = document.getElementById('correct-count');
+    const wrongCountDisplay = document.getElementById('wrong-count');
+    const reviewSection = document.getElementById('review-section');
+    const wrongList = document.getElementById('wrong-list');
+
+    // Control de la cantidad de preguntas (De 5 en 5, entre 5 y 100)
+    btnMinus.addEventListener('click', () => {
+      if (targetQuestionCount > 5) {
+        targetQuestionCount -= 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    btnPlus.addEventListener('click', () => {
+      if (targetQuestionCount < 100) {
+        targetQuestionCount += 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    // Iniciar Juego
+    startBtn.addEventListener('click', startGame);
+    finishBtn.addEventListener('click', endGame);
+    restartBtn.addEventListener('click', resetToStart);
+
+    function startGame() {
+      currentIndex = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      wrongQuestions = [];
+
+      // Seleccionar preguntas aleatorias de la base de datos
+      const shuffled = [...database].sort(() => 0.5 - Math.random());
+      selectedQuestions = shuffled.slice(0, targetQuestionCount);
+
+      startScreen.classList.remove('active');
+      gameScreen.classList.add('active');
+
+      renderQuestion();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 15;
+      timerText.textContent = `${timeLeft}s`;
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerText.textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      isAnsweringAllowed = true;
+      const currentQ = selectedQuestions[currentIndex];
+
+      progressText.textContent = `Pregunta ${currentIndex + 1} de ${selectedQuestions.length}`;
+      verbDisplay.textContent = currentQ.verb;
+      optionsContainer.innerHTML = '';
+
+      // Generar 2 distractoras únicas
+      const distractors = database
+        .filter(item => item.verb !== currentQ.verb)
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 2);
+
+      // Crear las 3 opciones (A, B, C) y desordenarlas
+      const optionsData = [
+        { text: currentQ.meaning, isCorrect: true },
+        { text: distractors[0].meaning, isCorrect: false },
+        { text: distractors[1].meaning, isCorrect: false }
+      ].sort(() => 0.5 - Math.random());
+
+      const labels = ['a', 'b', 'c'];
+
+      optionsData.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.classList.add('option-btn');
+        btn.dataset.isCorrect = opt.isCorrect;
+
+        btn.innerHTML = `
+          <span class="label">${labels[idx]}</span>
+          <span>${opt.text}</span>
+        `;
+
+        btn.addEventListener('click', () => handleAnswer(btn, opt.isCorrect));
+        optionsContainer.appendChild(btn);
+      });
+
+      startTimer();
+    }
+
+    function handleAnswer(selectedBtn, isCorrect) {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+      clearInterval(timerInterval);
+
+      const currentQ = selectedQuestions[currentIndex];
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+      if (isCorrect) {
+        selectedBtn.classList.add('correct');
+        correctCount++;
+      } else {
+        selectedBtn.classList.add('wrong');
+        wrongCount++;
+        wrongQuestions.push(currentQ);
+        // Iluminar en verde la respuesta correcta si se respondió mal
+        buttons.forEach(btn => {
+          if (btn.dataset.isCorrect === 'true') {
+            btn.classList.add('correct');
+          }
+        });
+      }
+
+      // Deshabilitar todos los botones durante la transición
+      buttons.forEach(btn => btn.disabled = true);
+
+      // Siguiente pregunta después de 1.2 segundos
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1200);
+    }
+
+    function handleTimeout() {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+
+      const currentQ = selectedQuestions[currentIndex];
+      wrongCount++;
+      wrongQuestions.push(currentQ);
+
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+      // Deshabilitar todos los botones y hacer parpadear en rojo ÚNICAMENTE la respuesta correcta
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.isCorrect === 'true') {
+          btn.classList.add('blink-red');
+        }
+      });
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1200);
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      gameScreen.classList.remove('active');
+      endScreen.classList.add('active');
+
+      correctCountDisplay.textContent = correctCount;
+      wrongCountDisplay.textContent = wrongCount;
+
+      // Desplegar lista de Phrasal Verbs a reforzar si hubo fallos
+      if (wrongQuestions.length > 0) {
+        reviewSection.style.display = 'block';
+        wrongList.innerHTML = wrongQuestions.map(item => `
+          <div class="wrong-item">
+            <span class="wrong-item-verb">${item.verb}</span>
+            <span class="wrong-item-meaning">${item.meaning}</span>
+          </div>
+        `).join('');
+      } else {
+        reviewSection.style.display = 'none';
+        wrongList.innerHTML = '';
+      }
+    }
+
+    function resetToStart() {
+      clearInterval(timerInterval);
+      endScreen.classList.remove('active');
+      startScreen.classList.add('active');
+    }
+  </script>
+</body>
+</html>
