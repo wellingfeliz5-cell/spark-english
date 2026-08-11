@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spark English - Hub</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --card-hover-bg: #f5f3ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 580px;
+      border-radius: 20px;
+      padding: 36px 32px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #e0e7ff;
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: var(--text);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    p.subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .menu-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .game-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .game-card:hover {
+        border-color: var(--accent);
+        background-color: var(--card-hover-bg);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+      }
+
+      .game-card:hover .icon-wrapper {
+        background-color: var(--accent);
+        color: #ffffff;
+      }
+
+      .game-card:hover .arrow {
+        color: var(--accent);
+        transform: translateX(3px);
+      }
+    }
+
+    .card-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .icon-wrapper {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background-color: #f1f5f9;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .description {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .arrow {
+      font-size: 1.2rem;
+      color: #94a3b8;
+      transition: transform 0.2s, color 0.2s;
+      font-weight: 600;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="brand-badge">✨ Improve your English.</div>
+      <h1>Spark English!</h1>
+      <p class="subtitle">Selecciona un módulo para comenzar tu práctica 🚀</p>
+    </header>
+
+    <main class="menu-grid">
+      <!-- Verbos -->
+      <a href="verbs.html" class="game-card">
+        <div class="card-content">
+          <div class="icon-wrapper">V</div>
+          <div class="info">
+            <div class="title">Verbs</div>
+            <div class="description">Verbos de acción esenciales en inglés</div>
+          </div>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <!-- Phrasal Verbs -->
+      <a href="phverbs.html" class="game-card">
+        <div class="card-content">
+          <div class="icon-wrapper">PV</div>
+          <div class="info">
+            <div class="title">Phrasal Verbs</div>
+            <div class="description">Expresiones compuestas y verbos frasales</div>
+          </div>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <!-- Adjetivos -->
+      <a href="adjetives.html" class="game-card">
+        <div class="card-content">
+          <div class="icon-wrapper">A</div>
+          <div class="info">
+            <div class="title">Adjectives</div>
+            <div class="description">Vocabulario descriptivo y cualidades</div>
+          </div>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <!-- Conectores y Preposiciones -->
+      <a href="con-pre.html" class="game-card">
+        <div class="card-content">
+          <div class="icon-wrapper">CP</div>
+          <div class="info">
+            <div class="title">Connectors & Prepositions</div>
+            <div class="description">Enlaces, tiempos y relaciones espaciales</div>
+          </div>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <!-- Vocabulario -->
+      <a href="v-display.html" class="game-card">
+        <div class="card-content">
+          <div class="icon-wrapper">VC</div>
+          <div class="info">
+            <div class="title">Vocabulary</div>
+            <div class="description">Palabras temáticas: hogar, entorno, viajes y más</div>
+          </div>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+    </main>
+
+    <footer>
+      © 2026 Spark English • All rights reserved.
+    </footer>
+  </div>
+
+</body>
+</html>
