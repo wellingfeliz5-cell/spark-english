@@ -272,6 +272,38 @@
       color: white;
     }
 
+    .option-btn.blink-red {
+      animation: blinkRed 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRed {
+      0%, 100% {
+        background-color: #ffffff;
+        border-color: var(--border);
+        color: var(--text);
+      }
+      50% {
+        background-color: var(--wrong-bg);
+        border-color: var(--wrong);
+        color: #991b1b;
+      }
+    }
+
+    .option-btn.blink-red .label {
+      animation: blinkRedLabel 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRedLabel {
+      0%, 100% {
+        background-color: #f1f5f9;
+        color: var(--accent);
+      }
+      50% {
+        background-color: var(--wrong);
+        color: white;
+      }
+    }
+
     /* Pantalla Final */
     .results-grid {
       display: grid;
@@ -580,7 +612,7 @@
 
     function startTimer() {
       clearInterval(timerInterval);
-      timeLeft = 30;
+      timeLeft = 15;
       timerText.textContent = `${timeLeft}s`;
 
       timerInterval = setInterval(() => {
@@ -649,7 +681,7 @@
         selectedBtn.classList.add('wrong');
         wrongCount++;
         wrongQuestions.push(currentQ);
-        // Iluminar en verde la respuesta correcta
+        // Iluminar en verde la respuesta correcta si se respondió mal
         buttons.forEach(btn => {
           if (btn.dataset.isCorrect === 'true') {
             btn.classList.add('correct');
@@ -681,12 +713,12 @@
 
       const buttons = optionsContainer.querySelectorAll('.option-btn');
 
-      // Marcar la opción correcta en verde para que la aprenda
+      // Deshabilitar todos los botones y hacer parpadear en rojo ÚNICAMENTE la respuesta correcta
       buttons.forEach(btn => {
-        if (btn.dataset.isCorrect === 'true') {
-          btn.classList.add('correct');
-        }
         btn.disabled = true;
+        if (btn.dataset.isCorrect === 'true') {
+          btn.classList.add('blink-red');
+        }
       });
 
       setTimeout(() => {
