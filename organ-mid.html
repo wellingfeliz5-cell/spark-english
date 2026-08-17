@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentence Fill - Intermediate Level</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --accent-light: #e0f2fe;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --correct: #10b981;
+      --correct-bg: #ecfdf5;
+      --wrong: #ef4444;
+      --wrong-bg: #fef2f2;
+      --border: #e2e8f0;
+      --timer-bg: #fee2e2;
+      --timer-text: #dc2626;
+      --tag-text: #0369a1;
+      --tag-bg: #e0f2fe;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 550px;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* Selector de Preguntas */
+    .selector-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      background-color: #f1f5f9;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .stepper button {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .stepper button:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    .stepper span {
+      font-size: 1.4rem;
+      font-weight: 600;
+      width: 70px;
+      text-align: center;
+    }
+
+    /* Botones generales */
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+      }
+    }
+
+    .btn-danger {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-danger:hover {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+    }
+
+    .btn-secondary {
+      background-color: #f1f5f9;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-secondary:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    /* Interfaz de Juego */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+
+    .progress {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .timer-badge {
+      background-color: var(--timer-bg);
+      color: var(--timer-text);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #fca5a5;
+    }
+
+    .sentence-box {
+      text-align: center;
+      padding: 20px 16px;
+      background-color: #f8fafc;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+    }
+
+    .sentence-es {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* Área de Cuadritos de Respuesta */
+    .answer-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .answer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .answer-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .answer-area {
+      min-height: 85px;
+      background-color: #ffffff;
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-content: flex-start;
+      transition: all 0.2s;
+    }
+
+    .answer-area.correct-state {
+      border-color: var(--correct);
+      background-color: var(--correct-bg);
+    }
+
+    .answer-area.wrong-state {
+      border-color: var(--wrong);
+      background-color: var(--wrong-bg);
+    }
+
+    /* Cuadritos agregados a la respuesta */
+    .word-box {
+      background-color: #e0f2fe;
+      border: 1px solid #38bdf8;
+      color: #0369a1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      animation: popIn 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .word-box .remove-btn {
+      background: rgba(3, 105, 161, 0.1);
+      border: none;
+      color: #0369a1;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    @media (hover: hover) {
+      .word-box .remove-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--wrong);
+      }
+    }
+
+    /* Banco de Palabras */
+    .words-bank-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .words-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .bank-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .bank-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background-color: var(--accent-light);
+        color: var(--tag-text);
+      }
+    }
+
+    .bank-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      border-style: dashed;
+    }
+
+    /* Pantalla Final */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .stat-card {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card.correct-card { border-color: #a7f3d0; background-color: #ecfdf5; }
+    .stat-card.wrong-card { border-color: #fca5a5; background-color: #fef2f2; }
+
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .correct-card .stat-value { color: var(--correct); }
+    .wrong-card .stat-value { color: var(--wrong); }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .wrong-list-container {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .wrong-item {
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.9rem;
+    }
+
+    .wrong-item-sentence {
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .wrong-item-translation {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 1. PANTALLA INICIAL -->
+    <div id="start-screen" class="screen active">
+      <h1>Sentence Fill - Intermediate</h1>
+      <p class="subtitle">🚀 Ordena las palabras en inglés para formar oraciones intermedias 🚀</p>
+      
+      <div class="selector-group">
+        <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">¿Cuántas oraciones deseas practicar?</label>
+        <div class="stepper">
+          <button id="btn-minus">-</button>
+          <span id="question-count">10</span>
+          <button id="btn-plus">+</button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary">¡Comenzar Juego!</button>
+      <a href="index.html" class="btn-secondary" style="text-decoration: none; text-align: center; margin-top: 5px;">← Menú Principal</a>
+    </div>
+
+    <!-- 2. PANTALLA DEL JUEGO -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <span class="progress" id="progress-text">Pregunta 1 de 10</span>
+        <div class="timer-badge">⏱️ <span id="timer-text">60s</span></div>
+        <button id="finish-btn" class="btn-danger">Finalizar</button>
+      </div>
+
+      <div class="sentence-box">
+        <div class="sentence-es" id="sentence-es-display">Aunque estaba lloviendo, decidimos ir de excursión.</div>
+      </div>
+
+      <div class="answer-section">
+        <div class="answer-header">
+          <span class="answer-title">Tu respuesta:</span>
+          <button id="undo-btn" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">⬅ Deshacer</button>
+        </div>
+        <div class="answer-area" id="answer-area">
+          <!-- Cuadritos colocados -->
+        </div>
+      </div>
+
+      <div class="words-bank-container">
+        <span class="answer-title" style="text-align: center; display: block;">Selecciona las palabras:</span>
+        <div class="words-bank" id="words-bank">
+          <!-- Botones de palabras desordenadas -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. PANTALLA DE RESULTADOS -->
+    <div id="end-screen" class="screen">
+      <h1>¡Juego Terminado!</h1>
+      <p class="subtitle" id="final-status-text">Resumen de tu partida:</p>
+
+      <div class="results-grid">
+        <div class="stat-card correct-card">
+          <div class="stat-value" id="correct-count">0</div>
+          <div class="stat-label">Correctas</div>
+        </div>
+        <div class="stat-card wrong-card">
+          <div class="stat-value" id="wrong-count">0</div>
+          <div class="stat-label">Incorrectas</div>
+        </div>
+      </div>
+
+      <div id="review-section" style="display: none;">
+        <h3 style="font-size: 1.1rem; color: var(--text); font-weight: 700; margin-bottom: 8px;">Oraciones para reforzar:</h3>
+        <div class="wrong-list-container" id="wrong-list"></div>
+      </div>
+
+      <button id="restart-btn" class="btn-primary">Jugar de nuevo</button>
+      <a href="index.html" class="btn-secondary" style="text-decoration: none; text-align: center; margin-top: 5px;">← Menú Principal</a>
+    </div>
+  </div>
+
+  <script>
+    // Base de Datos de 100 Oraciones Nivel Intermedio
+    const rawDatabase = [
+      { en: "Although it was raining, we decided to go hiking.", es: "Aunque estaba lloviendo, decidimos ir de excursión." },
+      { en: "She managed to finish the report before the deadline.", es: "Ella logró terminar el informe antes de la fecha límite." },
+      { en: "He has been studying English for three years now.", es: "Él ha estado estudiando inglés durante tres años." },
+      { en: "I would appreciate it if you could reply quickly.", es: "Agradecería que pudieras responder rápidamente." },
+      { en: "They are considering moving to a bigger city soon.", es: "Están considerando mudarse a una ciudad más grande pronto." },
+      { en: "If I had more time, I would learn French.", es: "Si tuviera más tiempo, aprendería francés." },
+      { en: "She apologized for being late to the important meeting.", es: "Ella se disculpó por llegar tarde a la reunión importante." },
+      { en: "We need to find a solution to this problem.", es: "Necesitamos encontrar una solución a este problema." },
+      { en: "He is responsible for managing the daily schedule.", es: "Él es responsable de gestionar el horario diario." },
+      { en: "The project was completed ahead of schedule yesterday.", es: "El proyecto se completó antes de lo previsto ayer." },
+      { en: "I am looking forward to hearing from you soon.", es: "Espero con interés tener noticias tuyas pronto." },
+      { en: "She refused to give up despite facing many challenges.", es: "Ella se negó a rendirse a pesar de enfrentar desafíos." },
+      { en: "You should take advantage of this great opportunity.", es: "Deberías aprovechar esta gran oportunidad." },
+      { en: "He explained the instructions clearly to all participants.", es: "Él explicó las instrucciones claramente a todos los participantes." },
+      { en: "We must carefully consider all available options before deciding.", es: "Debemos considerar cuidadosamente todas las opciones antes de decidir." },
+      { en: "She succeeded in launching her own private business.", es: "Ella tuvo éxito al lanzar su propio negocio privado." },
+      { en: "I realized I had left my wallet at home.", es: "Me di cuenta de que había dejado mi cartera en casa." },
+      { en: "They are planning to expand their operations overseas next.", es: "Planean expandir sus operaciones en el extranjero próximamente." },
+      { en: "He was disappointed with the outcome of the game.", es: "Él estaba decepcionado con el resultado del juego." },
+      { en: "Could you please clarify what you mean by that?", es: "¿Podrías aclarar qué quieres decir con eso?" },
+      { en: "She is dynamic enough to adapt to changing circumstances.", es: "Ella es bastante dinámica para adaptarse a circunstancias cambiantes." },
+      { en: "We were surprised by the sudden change in weather.", es: "Nos sorprendió el cambio repentino en el clima." },
+      { en: "He promised to keep me updated on the progress.", es: "Él prometió mantenerme actualizado sobre el progreso." },
+      { en: "I am fully aware of the potential risks involved.", es: "Soy plenamente consciente de los riesgos potenciales involucrados." },
+      { en: "They have been living here since last summer ended.", es: "Han estado viviendo aquí desde que terminó el verano pasado." },
+      { en: "She insisted on paying for the entire dinner herself.", es: "Ella insistió en pagar toda la cena ella misma." },
+      { en: "This decision will significantly affect our future plans.", es: "Esta decisión afectará significativamente nuestros planes futuros." },
+      { en: "He avoids making quick decisions without proper research.", es: "Él evita tomar decisiones rápidas sin la investigación adecuada." },
+      { en: "We need to improve our communication skills constantly.", es: "Necesitamos mejorar nuestras habilidades de comunicación constantemente." },
+      { en: "She demonstrated a clear understanding of the subject.", es: "Ella demostró una clara comprensión del tema." },
+      { en: "I strongly recommend trying this local traditional dish.", es: "Recomiendo encarecidamente probar este plato tradicional local." },
+      { en: "They agreed to negotiate the terms of agreement.", es: "Ellos acordaron negociar los términos del acuerdo." },
+      { en: "He handled the situation with great professional maturity.", es: "Manejó la situación con gran madurez profesional." },
+      { en: "It is essential to double check your work carefully.", es: "Es esencial revisar tu trabajo cuidadosamente." },
+      { en: "She has made remarkable progress in her studies.", es: "Ella ha logrado un progreso notable en sus estudios." },
+      { en: "We ran out of time during the final presentation.", es: "Nos quedamos sin tiempo durante la presentación final." },
+      { en: "He was encouraged by the positive feedback received.", es: "Él se sintió animado por los comentarios positivos recibidos." },
+      { en: "I am not used to waking up this early.", es: "No estoy acostumbrado a despertarme tan temprano." },
+      { en: "They decided to postpone the event until next week.", es: "Decidieron posponer el evento hasta la próxima semana." },
+      { en: "She handles stressful situations remarkably well every time.", es: "Ella maneja situaciones estresantes notablemente bien cada vez." },
+      { en: "He turns down offers that lack clear career growth.", es: "Rechaza ofertas que carecen de crecimiento profesional claro." },
+      { en: "We should focus on solving the most urgent task.", es: "Deberíamos enfocarnos en resolver la tarea más urgente." },
+      { en: "She expressed her sincere gratitude for our generous help.", es: "Expresó su sincero agradecimiento por nuestra generosa ayuda." },
+      { en: "I accidentally deleted the file from my system.", es: "Eliminé accidentalmente el archivo de mi sistema." },
+      { en: "They are willing to compromise to reach an agreement.", es: "Están dispuestos a ceder para llegar a un acuerdo." },
+      { en: "He tends to overthink things when making choices.", es: "Tiende a pensar demasiado las cosas al tomar decisiones." },
+      { en: "It is important to maintain a healthy balance daily.", es: "Es importante mantener un equilibrio saludable a diario." },
+      { en: "She convinced the team to adopt a new strategy.", es: "Convenció al equipo de adoptar una nueva estrategia." },
+      { en: "We barely had enough time to catch the flight.", es: "Apenas tuvimos tiempo suficiente para tomar el vuelo." },
+      { en: "He was accused of neglecting his official duties.", es: "Fue acusado de descuidar sus deberes oficiales." },
+      { en: "I am confident that everything will go smoothly tomorrow.", es: "Estoy seguro de que todo saldrá bien mañana." },
+      { en: "She managed to balance work and personal life.", es: "Logró equilibrar el trabajo y la vida personal." },
+      { en: "They are continuously searching for innovative solution methods.", es: "Están buscando continuamente métodos de solución innovadores." },
+      { en: "He raised an interesting point during the debate.", es: "Planteó un punto interesante durante el debate." },
+      { en: "We must adapt quickly to these unexpected developments.", es: "Debemos adaptarnos rápidamente a estos desarrollos inesperados." },
+      { en: "She was determined to achieve her ambitious goals.", es: "Estaba decidida a alcanzar sus metas ambiciosas." },
+      { en: "I doubt that he will change his strong opinion.", es: "Dudo que él cambie su firme opinión." },
+      { en: "They took measures to prevent further system errors.", es: "Tomaron medidas para prevenir más errores del sistema." },
+      { en: "He was rewarded for his exceptional dedication today.", es: "Fue recompensado hoy por su excepcional dedicación." },
+      { en: "We spent hours discussing the details of the contract.", es: "Pasamos horas discutiendo los detalles del contrato." },
+      { en: "She prefers working independently rather than in teams.", es: "Prefiere trabajar de forma independiente en lugar de en equipo." },
+      { en: "I am writing to inquire about the job position.", es: "Escribo para consultar sobre la posición laboral." },
+      { en: "They overcame several major obstacles along the way.", es: "Superaron varios obstáculos importantes en el camino." },
+      { en: "He takes pride in producing high quality work.", es: "Se enorgullece de producir trabajo de alta calidad." },
+      { en: "It took months to recover from the injury.", es: "Tomó meses recuperarse de la lesión." },
+      { en: "She pointed out an obvious flaw in the plan.", es: "Señaló una falla obvia en el plan." },
+      { en: "We had better leave now to avoid heavy traffic.", es: "Será mejor que nos vayamos ahora para evitar tráfico pesado." },
+      { en: "He was appointed as the new project manager.", es: "Fue nombrado como el nuevo gerente de proyecto." },
+      { en: "I rarely see him around the neighborhood these days.", es: "Rara vez lo veo por el vecindario estos días." },
+      { en: "They provided valuable insights during the discussion session.", es: "Aportaron valiosos conocimientos durante la sesión de discusión." },
+      { en: "She managed to persuade them to join us.", es: "Logró persuadirlos para que se unieran a nosotros." },
+      { en: "We are gathered here to celebrate this special achievement.", es: "Estamos reunidos aquí para celebrar este logro especial." },
+      { en: "He tends to get nervous before public speaking.", es: "Tiende a ponerse nervioso antes de hablar en público." },
+      { en: "I cannot afford to waste any more precious time.", es: "No puedo darme el lujo de perder más tiempo valioso." },
+      { en: "They established new guidelines for all team members.", es: "Establecieron nuevas pautas para todos los miembros del equipo." },
+      { en: "She was shocked by the news of the accident.", es: "Quedó conmocionada por la noticia del accidente." },
+      { en: "We need to evaluate the impact of this change.", es: "Necesitamos evaluar el impacto de este cambio." },
+      { en: "He works hard to fulfill his professional obligations.", es: "Trabaja duro para cumplir sus obligaciones profesionales." },
+      { en: "I am satisfied with the current progress made.", es: "Estoy satisfecho con el progreso actual realizado." },
+      { en: "They encountered unexpected technical difficulties during testing.", es: "Encontraron dificultades técnicas inesperadas durante las pruebas." },
+      { en: "She expressed interest in expanding her technical skill set.", es: "Expresó interés en ampliar su conjunto de habilidades técnicas." },
+      { en: "We must ensure that all standards are met.", es: "Debemos asegurarnos de que se cumplan todos los estándares." },
+      { en: "He struggled to maintain focus throughout the lecture.", es: "Luchó por mantener la concentración durante la conferencia." },
+      { en: "I would rather stay home than go out tonight.", es: "Preferiría quedarme en casa antes que salir esta noche." },
+      { en: "They aim to reduce operational costs this year.", es: "Tienen como objetivo reducir los costos operativos este año." },
+      { en: "She took full responsibility for the team's mistake.", es: "Asumió toda la responsabilidad por el error del equipo." },
+      { en: "We were inspired by her remarkable success story.", es: "Nos inspiró su historia de éxito notable." },
+      { en: "He failed to notice the warning sign posted.", es: "No se dio cuenta de la señal de advertencia colocada." },
+      { en: "I appreciate your willingness to help us today.", es: "Aprecio tu disposición a ayudarnos hoy." },
+      { en: "They are aiming for a higher market share.", es: "Están apuntando a una mayor cuota de mercado." },
+      { en: "She handles delicate client issues with diplomacy.", es: "Maneja asuntos delicados de clientes con diplomacia." },
+      { en: "We should prepare thoroughly for the upcoming audit.", es: "Deberíamos prepararnos a fondo para la próxima auditoría." },
+      { en: "He made a valuable contribution to the research.", es: "Hizo una contribución valiosa a la investigación." },
+      { en: "It is essential to set realistic goals daily.", es: "Es esencial establecer metas realistas a diario." },
+      { en: "She remains calm under intense work pressure.", es: "Permanece tranquila bajo una intensa presión laboral." },
+      { en: "They agreed to extend the project's final deadline.", es: "Acordaron extender la fecha límite final del proyecto." },
+      { en: "He constantly strives to improve his personal performance.", es: "Se esfuerza constantemente por mejorar su rendimiento personal." },
+      { en: "We were impressed by the high presentation quality.", es: "Quedamos impresionados por la alta calidad de la presentación." },
+      { en: "She successfully negotiated a better contract deal.", es: "Negoció con éxito un mejor acuerdo de contrato." },
+      { en: "Continuous practice leads to natural language fluency.", es: "La práctica continua conduce a la fluidez natural del idioma." }
+    ];
+
+    // Limpieza e interpretación de oraciones
+    const database = rawDatabase.map(item => {
+      // Limpiar puntuación básica para obtener las palabras
+      const cleanEn = item.en.replace(/[.,?!]/g, '');
+      const words = cleanEn.split(/\s+/);
+      return {
+        enOriginal: item.en,
+        es: item.es,
+        targetWords: words
+      };
+    });
+
+    // Banco de palabras aleatorias para distractores
+    const allDistractorWords = Array.from(
+      new Set(database.flatMap(item => item.targetWords))
+    );
+
+    // Estado del juego
+    let targetQuestionCount = 10;
+    let selectedQuestions = [];
+    let wrongQuestions = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let isAnsweringAllowed = true;
+    let timerInterval = null;
+    let timeLeft = 60;
+
+    let currentSelectedWords = []; // Array de { id, text }
+    let availableBankWords = [];    // Array de { id, text }
+
+    // Elementos DOM
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreen = document.getElementById('end-screen');
+
+    const questionCountDisplay = document.getElementById('question-count');
+    const btnMinus = document.getElementById('btn-minus');
+    const btnPlus = document.getElementById('btn-plus');
+    const startBtn = document.getElementById('start-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const undoBtn = document.getElementById('undo-btn');
+
+    const progressText = document.getElementById('progress-text');
+    const timerText = document.getElementById('timer-text');
+    const sentenceEsDisplay = document.getElementById('sentence-es-display');
+    const answerArea = document.getElementById('answer-area');
+    const wordsBank = document.getElementById('words-bank');
+
+    const correctCountDisplay = document.getElementById('correct-count');
+    const wrongCountDisplay = document.getElementById('wrong-count');
+    const reviewSection = document.getElementById('review-section');
+    const wrongList = document.getElementById('wrong-list');
+
+    // Stepper de preguntas
+    btnMinus.addEventListener('click', () => {
+      if (targetQuestionCount > 5) {
+        targetQuestionCount -= 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    btnPlus.addEventListener('click', () => {
+      if (targetQuestionCount < 100) {
+        targetQuestionCount += 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    // Event listeners
+    startBtn.addEventListener('click', startGame);
+    finishBtn.addEventListener('click', endGame);
+    restartBtn.addEventListener('click', resetToStart);
+    undoBtn.addEventListener('click', handleUndo);
+
+    function startGame() {
+      currentIndex = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      wrongQuestions = [];
+
+      const shuffled = [...database].sort(() => 0.5 - Math.random());
+      selectedQuestions = shuffled.slice(0, Math.min(targetQuestionCount, database.length));
+
+      startScreen.classList.remove('active');
+      gameScreen.classList.add('active');
+
+      renderQuestion();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 60;
+      timerText.textContent = `${timeLeft}s`;
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerText.textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      isAnsweringAllowed = true;
+      const currentQ = selectedQuestions[currentIndex];
+
+      progressText.textContent = `Pregunta ${currentIndex + 1} de ${selectedQuestions.length}`;
+      sentenceEsDisplay.textContent = currentQ.es;
+      
+      answerArea.className = 'answer-area';
+      currentSelectedWords = [];
+
+      // Preparar banco de palabras (Palabras correctas + distractores)
+      const targetWords = currentQ.targetWords;
+      const neededTotal = Math.max(targetWords.length + 3, 10); // Más distractores para intermedio
+      const extraNeeded = neededTotal - targetWords.length;
+
+      const extraWords = allDistractorWords
+        .filter(w => !targetWords.includes(w))
+        .sort(() => 0.5 - Math.random())
+        .slice(0, extraNeeded);
+
+      const combinedWords = [...targetWords, ...extraWords]
+        .sort(() => 0.5 - Math.random());
+
+      availableBankWords = combinedWords.map((word, idx) => ({
+        id: `word-${idx}-${Date.now()}`,
+        text: word
+      }));
+
+      renderAnswerArea();
+      renderWordsBank();
+      startTimer();
+    }
+
+    function renderAnswerArea() {
+      answerArea.innerHTML = '';
+      currentSelectedWords.forEach((wordObj, index) => {
+        const box = document.createElement('div');
+        box.className = 'word-box';
+        box.innerHTML = `
+          <span>${wordObj.text}</span>
+          <button class="remove-btn" title="Quitar palabra">✕</button>
+        `;
+
+        box.querySelector('.remove-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!isAnsweringAllowed) return;
+          removeWordFromAnswer(index);
+        });
+
+        answerArea.appendChild(box);
+      });
+    }
+
+    function renderWordsBank() {
+      wordsBank.innerHTML = '';
+      availableBankWords.forEach((wordObj) => {
+        const btn = document.createElement('button');
+        btn.className = 'bank-btn';
+        btn.textContent = wordObj.text;
+        
+        // Si ya está seleccionada, deshabilitar
+        const isSelected = currentSelectedWords.some(w => w.id === wordObj.id);
+        if (isSelected) {
+          btn.disabled = true;
+        }
+
+        btn.addEventListener('click', () => {
+          if (!isAnsweringAllowed || isSelected) return;
+          addWordToAnswer(wordObj);
+        });
+
+        wordsBank.appendChild(btn);
+      });
+    }
+
+    function addWordToAnswer(wordObj) {
+      const currentQ = selectedQuestions[currentIndex];
+      currentSelectedWords.push(wordObj);
+      renderAnswerArea();
+      renderWordsBank();
+
+      // Si alcanzamos la cantidad de palabras necesarias para la oración objetivo
+      if (currentSelectedWords.length === currentQ.targetWords.length) {
+        validateAnswer();
+      }
+    }
+
+    function removeWordFromAnswer(index) {
+      currentSelectedWords.splice(index, 1);
+      renderAnswerArea();
+      renderWordsBank();
+    }
+
+    function handleUndo() {
+      if (!isAnsweringAllowed || currentSelectedWords.length === 0) return;
+      currentSelectedWords.pop();
+      renderAnswerArea();
+      renderWordsBank();
+    }
+
+    function validateAnswer() {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+      clearInterval(timerInterval);
+
+      const currentQ = selectedQuestions[currentIndex];
+      const userSentence = currentSelectedWords.map(w => w.text).join(' ');
+      const targetSentence = currentQ.targetWords.join(' ');
+
+      if (userSentence === targetSentence) {
+        answerArea.classList.add('correct-state');
+        correctCount++;
+      } else {
+        answerArea.classList.add('wrong-state');
+        wrongCount++;
+        wrongQuestions.push(currentQ);
+      }
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1300);
+    }
+
+    function handleTimeout() {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+
+      const currentQ = selectedQuestions[currentIndex];
+      answerArea.classList.add('wrong-state');
+      wrongCount++;
+      wrongQuestions.push(currentQ);
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1300);
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      gameScreen.classList.remove('active');
+      endScreen.classList.add('active');
+
+      correctCountDisplay.textContent = correctCount;
+      wrongCountDisplay.textContent = wrongCount;
+
+      if (wrongQuestions.length > 0) {
+        reviewSection.style.display = 'block';
+        wrongList.innerHTML = wrongQuestions.map(item => `
+          <div class="wrong-item">
+            <span class="wrong-item-sentence">${item.enOriginal}</span>
+            <span class="wrong-item-translation">${item.es}</span>
+          </div>
+        `).join('');
+      } else {
+        reviewSection.style.display = 'none';
+        wrongList.innerHTML = '';
+      }
+    }
+
+    function resetToStart() {
+      clearInterval(timerInterval);
+      endScreen.classList.remove('active');
+      startScreen.classList.add('active');
+    }
+  </script>
+
+  <!-- Script para Etiqueta Auto-Inyectada de Nombre de Juego -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const endScreen = document.getElementById("end-screen");
+      const title = endScreen ? endScreen.querySelector("h1") : null;
+
+      if (title) {
+        const gameBadge = document.createElement("span");
+        gameBadge.textContent = "Sentence Fill - Intermediate";
+        
+        Object.assign(gameBadge.style, {
+          display: "inline-block",
+          alignSelf: "center",
+          backgroundColor: "var(--tag-bg, #e0f2fe)",
+          color: "var(--tag-text, #0369a1)",
+          fontWeight: "700",
+          fontSize: "0.85rem",
+          padding: "4px 12px",
+          borderRadius: "20px",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          marginTop: "8px",
+          marginBottom: "12px"
+        });
+
+        title.insertAdjacentElement("afterend", gameBadge);
+      }
+    });
+  </script>
+
+  <!-- Script de Captura / Compartir -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const endScreen = document.getElementById("end-screen");
+      const restartBtn = document.getElementById("restart-btn");
+
+      if (endScreen && restartBtn) {
+        const shareBtn = document.createElement("button");
+        shareBtn.textContent = "📸 Guardar / Compartir";
+        shareBtn.className = "btn-primary";
+        
+        Object.assign(shareBtn.style, {
+          backgroundColor: "#2563eb",
+          marginTop: "10px"
+        });
+
+        restartBtn.parentNode.insertBefore(shareBtn, restartBtn);
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        shareBtn.addEventListener("click", async () => {
+          shareBtn.style.display = "none";
+          restartBtn.style.display = "none";
+
+          try {
+            const canvas = await html2canvas(document.querySelector(".container"), {
+              scale: 2,
+              backgroundColor: "#ffffff",
+              useCORS: true
+            });
+
+            shareBtn.style.display = "block";
+            restartBtn.style.display = "block";
+
+            if (isMobile && navigator.share && navigator.canShare) {
+              canvas.toBlob(async (blob) => {
+                if (!blob) throw new Error("No se pudo generar el blob");
+                const file = new File([blob], "mi-resultado.png", { type: "image/png" });
+
+                if (navigator.canShare({ files: [file] })) {
+                  await navigator.share({
+                    title: "¡Mi resultado!",
+                    text: "¡Mira cómo me fue en el juego!",
+                    files: [file]
+                  });
+                  return;
+                }
+                downloadImage(canvas);
+              }, "image/png");
+            } else {
+              downloadImage(canvas);
+            }
+          } catch (err) {
+            shareBtn.style.display = "block";
+            restartBtn.style.display = "block";
+            console.error("Error al procesar captura:", err);
+            alert("Ocurrió un error al generar la imagen.");
+          }
+        });
+
+        function downloadImage(canvas) {
+          const imageURI = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.download = "mi-resultado.png";
+          link.href = imageURI;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentence Fill - Select Level</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #4f46e5;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      
+      /* Level Colors */
+      --easy: #10b981;
+      --easy-bg: #ecfdf5;
+      --mid: #f59e0b;
+      --mid-bg: #fffbebfb;
+      --diff: #ef4444;
+      --diff-bg: #fef2f2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px;
+      padding: 32px 24px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .header-icon {
+      font-size: 2.8rem;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    p.subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    .level-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .level-card {
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-radius: 14px;
+      border: 2px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .level-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px -3px rgba(0, 0, 0, 0.08);
+    }
+
+    .level-card:active {
+      transform: translateY(0);
+    }
+
+    .level-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .level-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .level-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .level-badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Modificadores por Nivel */
+    .level-easy {
+      background-color: var(--easy-bg);
+      border-color: #a7f3d0;
+    }
+    .level-easy .level-title { color: #047857; }
+    .level-easy .level-badge { background-color: var(--easy); color: white; }
+
+    .level-mid {
+      background-color: #fffbeb;
+      border-color: #fde68a;
+    }
+    .level-mid .level-title { color: #b45309; }
+    .level-mid .level-badge { background-color: var(--mid); color: white; }
+
+    .level-diff {
+      background-color: var(--diff-bg);
+      border-color: #fca5a5;
+    }
+    .level-diff .level-title { color: #b91c1c; }
+    .level-diff .level-badge { background-color: var(--diff); color: white; }
+
+    .arrow-icon {
+      font-weight: 700;
+      font-size: 1.2rem;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header-icon">🎯</div>
+    <h1>Sentence Fill</h1>
+    <p class="subtitle">Selecciona tu nivel para comenzar la práctica</p>
+
+    <div class="level-list">
+      <!-- Nivel Easy -->
+      <a href="gramm1-easy.html" class="level-card level-easy">
+        <div class="level-info">
+          <div class="level-title">
+            <span>Easy</span>
+            <span class="level-badge">A1 - A2</span>
+          </div>
+          <span class="level-desc">Estructuras básicas y vocabulario cotidiano</span>
+        </div>
+        <span class="arrow-icon">➔</span>
+      </a>
+
+      <!-- Nivel Medium -->
+      <a href="gramm1-mid.html" class="level-card level-mid">
+        <div class="level-info">
+          <div class="level-title">
+            <span>Medium</span>
+            <span class="level-badge">B1 - B2</span>
+          </div>
+          <span class="level-desc">Tiempos compuestos y phrasal verbs</span>
+        </div>
+        <span class="arrow-icon">➔</span>
+      </a>
+
+      <!-- Nivel Difficult -->
+      <a href="gramm1-diff.html" class="level-card level-diff">
+        <div class="level-info">
+          <div class="level-title">
+            <span>Difficult</span>
+            <span class="level-badge">C1 - C2</span>
+          </div>
+          <span class="level-desc">Vocabulario avanzado y estructuras complejas</span>
+        </div>
+        <span class="arrow-icon">➔</span>
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>

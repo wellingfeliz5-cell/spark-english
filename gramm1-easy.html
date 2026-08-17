@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentence Fill - Easy Level</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #059669;
+      --accent-hover: #047857;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --correct: #10b981;
+      --correct-bg: #ecfdf5;
+      --wrong: #ef4444;
+      --wrong-bg: #fef2f2;
+      --border: #e2e8f0;
+      --timer-bg: #fee2e2;
+      --timer-text: #dc2626;
+      --tag-text: #047857;
+      --tag-bg: #d1fae5;
+      --option-hover-bg: #ecfdf5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 550px;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* Selector de Preguntas */
+    .selector-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      background-color: #f1f5f9;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .stepper button {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .stepper button:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    .stepper span {
+      font-size: 1.4rem;
+      font-weight: 600;
+      width: 70px;
+      text-align: center;
+    }
+
+    /* Botones generales */
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+      }
+    }
+
+    .btn-danger {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-danger:hover {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+    }
+
+    /* Interfaz de Juego */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+
+    .progress {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .timer-badge {
+      background-color: var(--timer-bg);
+      color: var(--timer-text);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #fca5a5;
+    }
+
+    .sentence-box {
+      text-align: center;
+      padding: 24px 16px;
+      background-color: #f8fafc;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sentence-en {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+      line-height: 1.4;
+    }
+
+    .sentence-es {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background-color: var(--option-hover-bg);
+      }
+    }
+
+    .option-btn .label {
+      font-weight: 700;
+      color: var(--tag-text);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background-color: var(--tag-bg);
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .option-btn.correct {
+      background-color: var(--correct-bg) !important;
+      border-color: var(--correct) !important;
+      color: #065f46 !important;
+    }
+
+    .option-btn.correct .label {
+      background-color: var(--correct);
+      color: white;
+    }
+
+    .option-btn.wrong {
+      background-color: var(--wrong-bg) !important;
+      border-color: var(--wrong) !important;
+      color: #991b1b !important;
+    }
+
+    .option-btn.wrong .label {
+      background-color: var(--wrong);
+      color: white;
+    }
+
+    .option-btn.blink-red {
+      animation: blinkRed 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRed {
+      0%, 100% {
+        background-color: #ffffff;
+        border-color: var(--border);
+        color: var(--text);
+      }
+      50% {
+        background-color: var(--wrong-bg);
+        border-color: var(--wrong);
+        color: #991b1b;
+      }
+    }
+
+    .option-btn.blink-red .label {
+      animation: blinkRedLabel 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRedLabel {
+      0%, 100% {
+        background-color: var(--tag-bg);
+        color: var(--tag-text);
+      }
+      50% {
+        background-color: var(--wrong);
+        color: white;
+      }
+    }
+
+    /* Pantalla Final */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .stat-card {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card.correct-card { border-color: #a7f3d0; background-color: #ecfdf5; }
+    .stat-card.wrong-card { border-color: #fca5a5; background-color: #fef2f2; }
+
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .correct-card .stat-value { color: var(--correct); }
+    .wrong-card .stat-value { color: var(--wrong); }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .wrong-list-container {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .wrong-item {
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.9rem;
+    }
+
+    .wrong-item-sentence {
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .wrong-item-translation {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 1. PANTALLA INICIAL -->
+    <div id="start-screen" class="screen active">
+      <h1>Fill in the Blank!</h1>
+      <p class="subtitle">✨ Completa la oración en inglés eligiendo la opción correcta ✨</p>
+      
+      <div class="selector-group">
+        <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">¿Cuántas preguntas deseas responder?</label>
+        <div class="stepper">
+          <button id="btn-minus">-</button>
+          <span id="question-count">10</span>
+          <button id="btn-plus">+</button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary">¡Comenzar Juego!</button>
+    </div>
+
+    <!-- 2. PANTALLA DEL JUEGO -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <span class="progress" id="progress-text">Pregunta 1 de 10</span>
+        <div class="timer-badge">⏱️ <span id="timer-text">35s</span></div>
+        <button id="finish-btn" class="btn-danger">Finalizar</button>
+      </div>
+
+      <div class="sentence-box">
+        <div class="sentence-en" id="sentence-en-display">...</div>
+        <div class="sentence-es" id="sentence-es-display">...</div>
+      </div>
+
+      <div class="options-list" id="options-container"></div>
+    </div>
+
+    <!-- 3. PANTALLA DE RESULTADOS -->
+    <div id="end-screen" class="screen">
+      <h1>¡Juego Terminado!</h1>
+      <p class="subtitle" id="final-status-text">Aquí tienes el resumen de tu partida:</p>
+
+      <div class="results-grid">
+        <div class="stat-card correct-card">
+          <div class="stat-value" id="correct-count">0</div>
+          <div class="stat-label">Correctas</div>
+        </div>
+        <div class="stat-card wrong-card">
+          <div class="stat-value" id="wrong-count">0</div>
+          <div class="stat-label">Incorrectas</div>
+        </div>
+      </div>
+
+      <div id="review-section" style="display: none;">
+        <h3 style="font-size: 1.1rem; color: var(--text); font-weight: 700; margin-bottom: 8px;">Sentences to reinforce:</h3>
+        <div class="wrong-list-container" id="wrong-list"></div>
+      </div>
+
+      <button id="restart-btn" class="btn-primary">Jugar de nuevo</button>
+    </div>
+  </div>
+
+  <script>
+    // Configuración general
+    const TIMER_DEFAULT = 35; // Temporizador ajustado a 35 segundos
+
+    // Base de Datos de 100 Oraciones
+    const rawData = [
+      { en: "I drink water every morning.", es: "Bebo agua todas las mañanas.", ans: "drink", opts: ["drink", "drinks", "drinking"] },
+      { en: "She likes to read books.", es: "A ella le gusta leer libros.", ans: "likes", opts: ["likes", "like", "liking"] },
+      { en: "They live in a big house.", es: "Ellos viven en una casa grande.", ans: "live", opts: ["live", "lives", "living"] },
+      { en: "We are learning English today.", es: "Estamos aprendiendo inglés hoy.", ans: "learning", opts: ["learning", "learn", "learns"] },
+      { en: "He works at a local bank.", es: "Él trabaja en un banco local.", ans: "works", opts: ["works", "work", "working"] },
+      { en: "The sun shines brightly today.", es: "El sol brilla intensamente hoy.", ans: "shines", opts: ["shines", "shine", "shining"] },
+      { en: "Do you want some coffee?", es: "¿Quieres un poco de café?", ans: "want", opts: ["want", "wants", "wanted"] },
+      { en: "My dog loves to run outside.", es: "A mi perro le encanta correr afuera.", ans: "loves", opts: ["loves", "love", "loving"] },
+      { en: "I need to buy some groceries.", es: "Necesito comprar algo de comer.", ans: "buy", opts: ["buy", "buys", "bought"] },
+      { en: "She is playing the acoustic guitar.", es: "Ella está tocando la guitarra acústica.", ans: "playing", opts: ["playing", "plays", "played"] },
+      { en: "We watched a movie last night.", es: "Vimos una película anoche.", ans: "watched", opts: ["watched", "watch", "watching"] },
+      { en: "He forgot his keys at home.", es: "Él olvidó sus llaves en casa.", ans: "forgot", opts: ["forgot", "forget", "forgets"] },
+      { en: "It is raining very hard now.", es: "Está lloviendo muy fuerte ahora.", ans: "raining", opts: ["raining", "rain", "rained"] },
+      { en: "Can you help me, please?", es: "¿Puedes ayudarme, por favor?", ans: "help", opts: ["help", "helps", "helped"] },
+      { en: "I usually wake up at six.", es: "Normalmente me despierto a las seis.", ans: "wake", opts: ["wake", "wakes", "woke"] },
+      { en: "They enjoy playing football together.", es: "Ellos disfrutan jugar al fútbol juntos.", ans: "enjoy", opts: ["enjoy", "enjoys", "enjoyed"] },
+      { en: "She travels to Spain every summer.", es: "Ella viaja a España cada verano.", ans: "travels", opts: ["travels", "travel", "traveling"] },
+      { en: "This song makes me feel happy.", es: "Esta canción me hace sentir feliz.", ans: "makes", opts: ["makes", "make", "made"] },
+      { en: "I have two brothers and one sister.", es: "Tengo dos hermanos y una hermana.", ans: "have", opts: ["have", "has", "had"] },
+      { en: "Where is the nearest train station?", es: "¿Dónde está la estación de tren más cercana?", ans: "nearest", opts: ["nearest", "nearer", "near"] },
+      { en: "He speaks three different languages fluently.", es: "Él habla tres idiomas diferentes con fluidez.", ans: "speaks", opts: ["speaks", "speak", "speaking"] },
+      { en: "We should clean the living room.", es: "Deberíamos limpiar la sala de estar.", ans: "clean", opts: ["clean", "cleans", "cleaning"] },
+      { en: "She works as a high school teacher.", es: "Ella trabaja como maestra de secundaria.", ans: "teacher", opts: ["teacher", "teach", "teaching"] },
+      { en: "I am waiting for the bus.", es: "Estoy esperando el autobús.", ans: "waiting", opts: ["waiting", "wait", "waited"] },
+      { en: "The food tastes really delicious.", es: "La comida sabe muy deliciosa.", ans: "tastes", opts: ["tastes", "taste", "tasting"] },
+      { en: "Do not forget your coat today.", es: "No olvides tu abrigo hoy.", ans: "forget", opts: ["forget", "forgets", "forgot"] },
+      { en: "He always arrives on time.", es: "Él siempre llega a tiempo.", ans: "arrives", opts: ["arrives", "arrive", "arriving"] },
+      { en: "I lost my phone yesterday afternoon.", es: "Perdí mi teléfono ayer por la tarde.", ans: "lost", opts: ["lost", "lose", "losing"] },
+      { en: "They are planning a short trip.", es: "Ellos están planeando un viaje corto.", ans: "planning", opts: ["planning", "plans", "planned"] },
+      { en: "Is this seat taken right now?", es: "¿Está ocupado este asiento ahora mismo?", ans: "taken", opts: ["taken", "take", "taking"] },
+      { en: "I will call you later tonight.", es: "Te llamaré más tarde esta noche.", ans: "call", opts: ["call", "calls", "calling"] },
+      { en: "She bought a red leather jacket.", es: "Ella compró una chaqueta de cuero roja.", ans: "bought", opts: ["bought", "buy", "buys"] },
+      { en: "We decided to stay at home.", es: "Decidimos quedarnos en casa.", ans: "decided", opts: ["decided", "decide", "deciding"] },
+      { en: "He can cook very well.", es: "Él sabe cocinar muy bien.", ans: "cook", opts: ["cook", "cooks", "cooked"] },
+      { en: "The store closes at eight PM.", es: "La tienda cierra a las ocho PM.", ans: "closes", opts: ["closes", "close", "closing"] },
+      { en: "I like chocolate ice cream best.", es: "Me gusta más el helado de chocolate.", ans: "like", opts: ["like", "likes", "liked"] },
+      { en: "They walked through the green park.", es: "Ellos caminaron por el parque verde.", ans: "walked", opts: ["walked", "walk", "walking"] },
+      { en: "She is looking for her glasses.", es: "Ella está buscando sus gafas.", ans: "looking", opts: ["looking", "look", "looked"] },
+      { en: "We need to save more money.", es: "Necesitamos ahorrar más dinero.", ans: "save", opts: ["save", "saves", "saved"] },
+      { en: "He answered all the test questions.", es: "Él respondió todas las preguntas del examen.", ans: "answered", opts: ["answered", "answer", "answering"] },
+      { en: "I feel tired after working all day.", es: "Me siento cansado después de trabajar todo el día.", ans: "tired", opts: ["tired", "tiring", "tire"] },
+      { en: "She opened the window for fresh air.", es: "Ella abrió la ventana para entrar aire fresco.", ans: "opened", opts: ["opened", "open", "opening"] },
+      { en: "They swim in the pool often.", es: "Ellos nadan en la piscina a menudo.", ans: "swim", opts: ["swim", "swims", "swimming"] },
+      { en: "My computer is working very slowly.", es: "Mi computadora está funcionando muy lento.", ans: "slowly", opts: ["slowly", "slow", "slower"] },
+      { en: "What time does the show start?", es: "¿A qué hora empieza el espectáculo?", ans: "start", opts: ["start", "starts", "started"] },
+      { en: "I understand what you are saying.", es: "Entiendo lo que estás diciendo.", ans: "understand", opts: ["understand", "understands", "understood"] },
+      { en: "She visits her grandmother every weekend.", es: "Ella visita a su abuela cada fin de semana.", ans: "visits", opts: ["visits", "visit", "visiting"] },
+      { en: "He is listening to music right now.", es: "Él está escuchando música ahora mismo.", ans: "listening", opts: ["listening", "listen", "listens"] },
+      { en: "We took many photos during vacation.", es: "Tomamos muchas fotos durante las vacaciones.", ans: "took", opts: ["took", "take", "taking"] },
+      { en: "The cat is sleeping on the sofa.", es: "El gato está durmiendo en el sofá.", ans: "sleeping", opts: ["sleeping", "sleeps", "slept"] },
+      { en: "I usually drink tea instead of coffee.", es: "Normalmente bebo té en lugar de café.", ans: "instead", opts: ["instead", "inside", "inspire"] },
+      { en: "She painted a beautiful picture yesterday.", es: "Ella pintó un cuadro hermoso ayer.", ans: "painted", opts: ["painted", "paints", "painting"] },
+      { en: "They invited us to their party.", es: "Ellos nos invitaron a su fiesta.", ans: "invited", opts: ["invited", "invite", "inviting"] },
+      { en: "He forgot to turn off the lights.", es: "Él olvidó apagar las luces.", ans: "turn", opts: ["turn", "turns", "turned"] },
+      { en: "I hope to see you soon.", es: "Espero verte pronto.", ans: "hope", opts: ["hope", "hopes", "hoping"] },
+      { en: "The weather is warm and sunny.", es: "El clima está cálido y soleado.", ans: "sunny", opts: ["sunny", "sun", "sunnier"] },
+      { en: "She studies hard for her exams.", es: "Ella estudia duro para sus exámenes.", ans: "studies", opts: ["studies", "study", "studying"] },
+      { en: "We need a new table for the kitchen.", es: "Necesitamos una mesa nueva para la cocina.", ans: "kitchen", opts: ["kitchen", "chicken", "cooker"] },
+      { en: "He rides his bicycle to work.", es: "Él va en bicicleta al trabajo.", ans: "rides", opts: ["rides", "ride", "riding"] },
+      { en: "I cannot find my wallet anywhere.", es: "No puedo encontrar mi cartera en ninguna parte.", ans: "find", opts: ["find", "finds", "found"] },
+      { en: "They visited a history museum last month.", es: "Ellos visitaron un museo de historia el mes pasado.", ans: "museum", opts: ["museum", "music", "mountain"] },
+      { en: "She is writing an email to her boss.", es: "Ella está escribiendo un correo a su jefe.", ans: "writing", opts: ["writing", "write", "wrote"] },
+      { en: "We spent the whole day outdoors.", es: "Pasamos todo el día al aire libre.", ans: "spent", opts: ["spent", "spend", "spending"] },
+      { en: "He bought a warm winter hat.", es: "Él compró un gorro de invierno abrigado.", ans: "winter", opts: ["winter", "wind", "winner"] },
+      { en: "I enjoy walking early in the morning.", es: "Disfruto caminar temprano por la mañana.", ans: "early", opts: ["early", "earlier", "earliest"] },
+      { en: "The children are playing in the garden.", es: "Los niños están jugando en el jardín.", ans: "children", opts: ["children", "child", "childs"] },
+      { en: "She closed the door very quietly.", es: "Ella cerró la puerta muy silenciosamente.", ans: "quietly", opts: ["quietly", "quiet", "quietness"] },
+      { en: "We order pizza every Friday night.", es: "Pedimos pizza todos los viernes por la noche.", ans: "order", opts: ["order", "orders", "ordering"] },
+      { en: "He works late on Tuesday evening.", es: "Él trabaja hasta tarde el martes por la noche.", ans: "evening", opts: ["evening", "even", "event"] },
+      { en: "I need to practice my English speech.", es: "Necesito practicar mi discurso en inglés.", ans: "practice", opts: ["practice", "practices", "practicing"] },
+      { en: "They left early to avoid traffic.", es: "Se fueron temprano para evitar el tráfico.", ans: "avoid", opts: ["avoid", "avoids", "avoided"] },
+      { en: "She always smiles when she sees me.", es: "Ella siempre sonríe cuando me ve.", ans: "smiles", opts: ["smiles", "smile", "smiling"] },
+      { en: "The book was better than the movie.", es: "El libro fue mejor que la película.", ans: "better", opts: ["better", "good", "best"] },
+      { en: "I take the bus every morning.", es: "Tomo el autobús todas las mañanas.", ans: "take", opts: ["take", "takes", "took"] },
+      { en: "He wants to travel the world someday.", es: "Él quiere viajar por el mundo algún día.", ans: "world", opts: ["world", "word", "work"] },
+      { en: "We are waiting for our flight now.", es: "Estamos esperando nuestro vuelo ahora.", ans: "flight", opts: ["flight", "fly", "flying"] },
+      { en: "She washes her hands before eating.", es: "Ella se lava las manos antes de comer.", ans: "washes", opts: ["washes", "wash", "washing"] },
+      { en: "I have a doctor appointment tomorrow.", es: "Tengo una cita médica mañana.", ans: "appointment", opts: ["appointment", "appoint", "appointed"] },
+      { en: "They bought fresh fruits at the market.", es: "Ellos compraron frutas frescas en el mercado.", ans: "fresh", opts: ["fresh", "fresher", "freshest"] },
+      { en: "He cleans his bedroom every Saturday.", es: "Él limpia su habitación todos los sábados.", ans: "bedroom", opts: ["bedroom", "bed", "bathroom"] },
+      { en: "I love reading before going to sleep.", es: "Me encanta leer antes de ir a dormir.", ans: "reading", opts: ["reading", "read", "reads"] },
+      { en: "She ordered a cup of green tea.", es: "Ella pidió una taza de té verde.", ans: "ordered", opts: ["ordered", "order", "ordering"] },
+      { en: "We must leave early tomorrow morning.", es: "Debemos salir temprano mañana por la mañana.", ans: "must", opts: ["must", "can", "should"] },
+      { en: "He fixed the broken wooden chair.", es: "Él arregló la silla de madera rota.", ans: "broken", opts: ["broken", "break", "broke"] },
+      { en: "The sky looks clear and dark tonight.", es: "El cielo se ve claro y oscuro esta noche.", ans: "clear", opts: ["clear", "clears", "cleared"] },
+      { en: "I try to eat healthy food daily.", es: "Intento comer comida saludable a diario.", ans: "healthy", opts: ["healthy", "health", "healthier"] },
+      { en: "She meets her friends every Friday.", es: "Ella se reúne con sus amigos todos los viernes.", ans: "meets", opts: ["meets", "meet", "meeting"] },
+      { en: "They are building a new shopping mall.", es: "Ellos están construyendo un nuevo centro comercial.", ans: "building", opts: ["building", "build", "builds"] },
+      { en: "He returned the book to the library.", es: "Él devolvió el libro a la biblioteca.", ans: "returned", opts: ["returned", "return", "returning"] },
+      { en: "I need some help with this task.", es: "Necesito algo de ayuda con esta tarea.", ans: "task", opts: ["task", "talk", "take"] },
+      { en: "She takes the dog for a walk.", es: "Ella saca al perro a pasear.", ans: "walk", opts: ["walk", "walks", "walking"] },
+      { en: "We enjoy listening to podcasts together.", es: "Disfrutamos escuchando podcasts juntos.", ans: "together", opts: ["together", "to", "gether"] },
+      { en: "He bought a new pair of shoes.", es: "Él compró un nuevo par de zapatos.", ans: "shoes", opts: ["shoes", "shoe", "show"] },
+      { en: "The lesson was easy to understand.", es: "La lección fue fácil de entender.", ans: "easy", opts: ["easy", "easily", "easier"] },
+      { en: "I usually drink milk with breakfast.", es: "Normalmente bebo leche con el desayuno.", ans: "breakfast", opts: ["breakfast", "break", "fast"] },
+      { en: "She is sitting near the entrance door.", es: "Ella está sentada cerca de la puerta de entrada.", ans: "entrance", opts: ["entrance", "enter", "entered"] },
+      { en: "They traveled to Paris last spring.", es: "Ellos viajaron a París la primavera pasada.", ans: "spring", opts: ["spring", "summer", "winter"] },
+      { en: "He forgot to pack his toothbrush.", es: "Él olvidó empacar su cepillo de dientes.", ans: "pack", opts: ["pack", "packs", "packed"] },
+      { en: "We are very excited about the news.", es: "Estamos muy emocionados por la noticia.", ans: "excited", opts: ["excited", "exciting", "excite"] },
+      { en: "Practice makes perfect in learning languages.", es: "La práctica hace al maestro en el aprendizaje de idiomas.", ans: "makes", opts: ["makes", "make", "made"] }
+    ];
+
+    // Mapeo automático para generar espacios en blanco
+    const database = rawData.map(item => {
+      // Reemplaza la palabra respetando mayúsculas/minúsculas básicas o palabras exactas
+      const regex = new RegExp(`\\b${item.ans}\\b`, 'i');
+      const sentenceBlank = item.en.replace(regex, "_____");
+      return {
+        sentence: sentenceBlank,
+        translation: item.es,
+        answer: item.ans,
+        options: item.opts
+      };
+    });
+
+    // Variables de estado
+    let targetQuestionCount = 10;
+    let selectedQuestions = [];
+    let wrongQuestions = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let isAnsweringAllowed = true;
+    let timerInterval = null;
+    let timeLeft = TIMER_DEFAULT;
+
+    // Elementos DOM
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreen = document.getElementById('end-screen');
+
+    const questionCountDisplay = document.getElementById('question-count');
+    const btnMinus = document.getElementById('btn-minus');
+    const btnPlus = document.getElementById('btn-plus');
+    const startBtn = document.getElementById('start-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const restartBtn = document.getElementById('restart-btn');
+
+    const progressText = document.getElementById('progress-text');
+    const timerText = document.getElementById('timer-text');
+    const sentenceEnDisplay = document.getElementById('sentence-en-display');
+    const sentenceEsDisplay = document.getElementById('sentence-es-display');
+    const optionsContainer = document.getElementById('options-container');
+
+    const correctCountDisplay = document.getElementById('correct-count');
+    const wrongCountDisplay = document.getElementById('wrong-count');
+    const reviewSection = document.getElementById('review-section');
+    const wrongList = document.getElementById('wrong-list');
+
+    // Stepper de selección
+    btnMinus.addEventListener('click', () => {
+      if (targetQuestionCount > 5) {
+        targetQuestionCount -= 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    btnPlus.addEventListener('click', () => {
+      if (targetQuestionCount < 100) {
+        targetQuestionCount += 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    startBtn.addEventListener('click', startGame);
+    finishBtn.addEventListener('click', endGame);
+    restartBtn.addEventListener('click', resetToStart);
+
+    function startGame() {
+      currentIndex = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      wrongQuestions = [];
+
+      const shuffled = [...database].sort(() => 0.5 - Math.random());
+      selectedQuestions = shuffled.slice(0, Math.min(targetQuestionCount, database.length));
+
+      startScreen.classList.remove('active');
+      gameScreen.classList.add('active');
+
+      renderQuestion();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = TIMER_DEFAULT;
+      timerText.textContent = `${timeLeft}s`;
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerText.textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      isAnsweringAllowed = true;
+      const currentQ = selectedQuestions[currentIndex];
+
+      progressText.textContent = `Pregunta ${currentIndex + 1} de ${selectedQuestions.length}`;
+      sentenceEnDisplay.textContent = currentQ.sentence;
+      sentenceEsDisplay.textContent = currentQ.translation;
+      optionsContainer.innerHTML = '';
+
+      const shuffledOptions = [...currentQ.options].sort(() => 0.5 - Math.random());
+      const labels = ['a', 'b', 'c'];
+
+      shuffledOptions.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.classList.add('option-btn');
+        const isCorrect = optText.toLowerCase() === currentQ.answer.toLowerCase();
+        btn.dataset.isCorrect = isCorrect;
+
+        btn.innerHTML = `
+          <span class="label">${labels[idx]}</span>
+          <span>${optText}</span>
+        `;
+
+        btn.addEventListener('click', () => handleAnswer(btn, isCorrect));
+        optionsContainer.appendChild(btn);
+      });
+
+      startTimer();
+    }
+
+    function handleAnswer(selectedBtn, isCorrect) {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+      clearInterval(timerInterval);
+
+      const currentQ = selectedQuestions[currentIndex];
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+      if (isCorrect) {
+        selectedBtn.classList.add('correct');
+        correctCount++;
+        sentenceEnDisplay.textContent = currentQ.sentence.replace("_____", currentQ.answer);
+      } else {
+        selectedBtn.classList.add('wrong');
+        wrongCount++;
+        wrongQuestions.push(currentQ);
+
+        buttons.forEach(btn => {
+          if (btn.dataset.isCorrect === 'true') {
+            btn.classList.add('correct');
+          }
+        });
+      }
+
+      buttons.forEach(btn => btn.disabled = true);
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1200);
+    }
+
+    function handleTimeout() {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+
+      const currentQ = selectedQuestions[currentIndex];
+      wrongCount++;
+      wrongQuestions.push(currentQ);
+
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.isCorrect === 'true') {
+          btn.classList.add('blink-red');
+        }
+      });
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1200);
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      gameScreen.classList.remove('active');
+      endScreen.classList.add('active');
+
+      correctCountDisplay.textContent = correctCount;
+      wrongCountDisplay.textContent = wrongCount;
+
+      if (wrongQuestions.length > 0) {
+        reviewSection.style.display = 'block';
+        wrongList.innerHTML = wrongQuestions.map(item => `
+          <div class="wrong-item">
+            <span class="wrong-item-sentence">${item.sentence.replace("_____", `[${item.answer}]`)}</span>
+            <span class="wrong-item-translation">${item.translation}</span>
+          </div>
+        `).join('');
+      } else {
+        reviewSection.style.display = 'none';
+        wrongList.innerHTML = '';
+      }
+    }
+
+    function resetToStart() {
+      clearInterval(timerInterval);
+      endScreen.classList.remove('active');
+      startScreen.classList.add('active');
+    }
+  </script>
+
+  <!-- Auto-etiqueta final -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const endScreen = document.getElementById("end-screen");
+      const title = endScreen ? endScreen.querySelector("h1") : null;
+
+      if (title) {
+        const gameBadge = document.createElement("span");
+        gameBadge.textContent = "Sentence Fill - 100 Pack";
+        
+        Object.assign(gameBadge.style, {
+          display: "inline-block",
+          alignSelf: "center",
+          backgroundColor: "var(--tag-bg, #d1fae5)",
+          color: "var(--tag-text, #047857)",
+          fontWeight: "700",
+          fontSize: "0.85rem",
+          padding: "4px 12px",
+          borderRadius: "20px",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          marginTop: "8px",
+          marginBottom: "12px"
+        });
+
+        title.insertAdjacentElement("afterend", gameBadge);
+      }
+    });
+  </script>
+
+  <!-- Captura y Compartir -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const endScreen = document.getElementById("end-screen");
+      const restartBtn = document.getElementById("restart-btn");
+
+      if (endScreen && restartBtn) {
+        const shareBtn = document.createElement("button");
+        shareBtn.textContent = "📸 Guardar / Compartir";
+        shareBtn.className = "btn-primary";
+        
+        Object.assign(shareBtn.style, {
+          backgroundColor: "#2563eb",
+          marginTop: "10px"
+        });
+
+        restartBtn.parentNode.insertBefore(shareBtn, restartBtn);
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        shareBtn.addEventListener("click", async () => {
+          shareBtn.style.display = "none";
+          restartBtn.style.display = "none";
+
+          try {
+            const canvas = await html2canvas(document.querySelector(".container"), {
+              scale: 2,
+              backgroundColor: "#ffffff",
+              useCORS: true
+            });
+
+            shareBtn.style.display = "block";
+            restartBtn.style.display = "block";
+
+            if (isMobile && navigator.share && navigator.canShare) {
+              canvas.toBlob(async (blob) => {
+                if (!blob) throw new Error("No se pudo generar el blob");
+                const file = new File([blob], "mi-resultado.png", { type: "image/png" });
+
+                if (navigator.canShare({ files: [file] })) {
+                  await navigator.share({
+                    title: "¡Mi resultado!",
+                    text: "¡Mira cómo me fue en el juego!",
+                    files: [file]
+                  });
+                  return;
+                }
+                downloadImage(canvas);
+              }, "image/png");
+            } else {
+              downloadImage(canvas);
+            }
+          } catch (err) {
+            shareBtn.style.display = "block";
+            restartBtn.style.display = "block";
+            console.error("Error al procesar captura:", err);
+            alert("Ocurrió un error al generar la imagen.");
+          }
+        });
+
+        function downloadImage(canvas) {
+          const imageURI = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.download = "mi-resultado.png";
+          link.href = imageURI;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

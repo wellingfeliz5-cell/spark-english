@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentence Fill - Easy Level</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --accent-light: #ecfdf5;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --correct: #10b981;
+      --correct-bg: #ecfdf5;
+      --wrong: #ef4444;
+      --wrong-bg: #fef2f2;
+      --border: #e2e8f0;
+      --timer-bg: #fee2e2;
+      --timer-text: #dc2626;
+      --tag-text: #047857;
+      --tag-bg: #d1fae5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 550px;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* Selector de Preguntas */
+    .selector-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      background-color: #f1f5f9;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .stepper button {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .stepper button:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    .stepper span {
+      font-size: 1.4rem;
+      font-weight: 600;
+      width: 70px;
+      text-align: center;
+    }
+
+    /* Botones generales */
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+      }
+    }
+
+    .btn-danger {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-danger:hover {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+    }
+
+    .btn-secondary {
+      background-color: #f1f5f9;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-secondary:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    /* Interfaz de Juego */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+
+    .progress {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .timer-badge {
+      background-color: var(--timer-bg);
+      color: var(--timer-text);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #fca5a5;
+    }
+
+    .sentence-box {
+      text-align: center;
+      padding: 20px 16px;
+      background-color: #f8fafc;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+    }
+
+    .sentence-es {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* Área de Cuadritos de Respuesta */
+    .answer-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .answer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .answer-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .answer-area {
+      min-height: 85px;
+      background-color: #ffffff;
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-content: flex-start;
+      transition: all 0.2s;
+    }
+
+    .answer-area.correct-state {
+      border-color: var(--correct);
+      background-color: var(--correct-bg);
+    }
+
+    .answer-area.wrong-state {
+      border-color: var(--wrong);
+      background-color: var(--wrong-bg);
+    }
+
+    /* Cuadritos agregados a la respuesta */
+    .word-box {
+      background-color: #f3e8ff;
+      border: 1px solid #c084fc;
+      color: #6b21a8;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      animation: popIn 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .word-box .remove-btn {
+      background: rgba(107, 33, 168, 0.1);
+      border: none;
+      color: #6b21a8;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    @media (hover: hover) {
+      .word-box .remove-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--wrong);
+      }
+    }
+
+    /* Banco de Palabras */
+    .words-bank-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .words-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .bank-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .bank-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background-color: var(--accent-light);
+        color: var(--tag-text);
+      }
+    }
+
+    .bank-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      border-style: dashed;
+    }
+
+    /* Pantalla Final */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .stat-card {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card.correct-card { border-color: #a7f3d0; background-color: #ecfdf5; }
+    .stat-card.wrong-card { border-color: #fca5a5; background-color: #fef2f2; }
+
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .correct-card .stat-value { color: var(--correct); }
+    .wrong-card .stat-value { color: var(--wrong); }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .wrong-list-container {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .wrong-item {
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.9rem;
+    }
+
+    .wrong-item-sentence {
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .wrong-item-translation {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 1. PANTALLA INICIAL -->
+    <div id="start-screen" class="screen active">
+      <h1>Sentence Fill - Easy</h1>
+      <p class="subtitle">✨ Ordena las palabras en inglés según la oración en español ✨</p>
+      
+      <div class="selector-group">
+        <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">¿Cuántas oraciones deseas practicar?</label>
+        <div class="stepper">
+          <button id="btn-minus">-</button>
+          <span id="question-count">10</span>
+          <button id="btn-plus">+</button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary">¡Comenzar Juego!</button>
+      <a href="index.html" class="btn-secondary" style="text-decoration: none; text-align: center; margin-top: 5px;">← Menú Principal</a>
+    </div>
+
+    <!-- 2. PANTALLA DEL JUEGO -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <span class="progress" id="progress-text">Pregunta 1 de 10</span>
+        <div class="timer-badge">⏱️ <span id="timer-text">60s</span></div>
+        <button id="finish-btn" class="btn-danger">Finalizar</button>
+      </div>
+
+      <div class="sentence-box">
+        <div class="sentence-es" id="sentence-es-display">Bebo agua todas las mañanas.</div>
+      </div>
+
+      <div class="answer-section">
+        <div class="answer-header">
+          <span class="answer-title">Tu respuesta:</span>
+          <button id="undo-btn" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">⬅ Deshacer</button>
+        </div>
+        <div class="answer-area" id="answer-area">
+          <!-- Cuadritos colocados -->
+        </div>
+      </div>
+
+      <div class="words-bank-container">
+        <span class="answer-title" style="text-align: center; display: block;">Selecciona las palabras:</span>
+        <div class="words-bank" id="words-bank">
+          <!-- Botones de palabras desordenadas -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. PANTALLA DE RESULTADOS -->
+    <div id="end-screen" class="screen">
+      <h1>¡Juego Terminado!</h1>
+      <p class="subtitle" id="final-status-text">Resumen de tu partida:</p>
+
+      <div class="results-grid">
+        <div class="stat-card correct-card">
+          <div class="stat-value" id="correct-count">0</div>
+          <div class="stat-label">Correctas</div>
+        </div>
+        <div class="stat-card wrong-card">
+          <div class="stat-value" id="wrong-count">0</div>
+          <div class="stat-label">Incorrectas</div>
+        </div>
+      </div>
+
+      <div id="review-section" style="display: none;">
+        <h3 style="font-size: 1.1rem; color: var(--text); font-weight: 700; margin-bottom: 8px;">Oraciones para reforzar:</h3>
+        <div class="wrong-list-container" id="wrong-list"></div>
+      </div>
+
+      <button id="restart-btn" class="btn-primary">Jugar de nuevo</button>
+      <a href="index.html" class="btn-secondary" style="text-decoration: none; text-align: center; margin-top: 5px;">← Menú Principal</a>
+    </div>
+  </div>
+
+  <script>
+    // Base de Datos de 100 Oraciones Nivel Fácil (A1 - B1)
+    const rawDatabase = [
+      { en: "I drink water every morning.", es: "Bebo agua todas las mañanas." },
+      { en: "She likes to read books.", es: "A ella le gusta leer libros." },
+      { en: "They live in a big house.", es: "Ellos viven en una casa grande." },
+      { en: "We are learning English today.", es: "Estamos aprendiendo inglés hoy." },
+      { en: "He works at a local bank.", es: "Él trabaja en un banco local." },
+      { en: "The sun shines brightly today.", es: "El sol brilla intensamente hoy." },
+      { en: "Do you want some coffee?", es: "¿Quieres un poco de café?" },
+      { en: "My dog loves to run outside.", es: "A mi perro le encanta correr afuera." },
+      { en: "I need to buy some groceries.", es: "Necesito comprar algo de comer." },
+      { en: "She is playing the acoustic guitar.", es: "Ella está tocando la guitarra acústica." },
+      { en: "We watched a movie last night.", es: "Vimos una película anoche." },
+      { en: "He forgot his keys at home.", es: "Él olvidó sus llaves en casa." },
+      { en: "It is raining very hard now.", es: "Está lloviendo muy fuerte ahora." },
+      { en: "Can you help me, please?", es: "¿Puedes ayudarme, por favor?" },
+      { en: "I usually wake up at six.", es: "Normalmente me despierto a las seis." },
+      { en: "They enjoy playing football together.", es: "Ellos disfrutan jugar al fútbol juntos." },
+      { en: "She travels to Spain every summer.", es: "Ella viaja a España cada verano." },
+      { en: "This song makes me feel happy.", es: "Esta canción me hace sentir feliz." },
+      { en: "I have two brothers and one sister.", es: "Tengo dos hermanos y una hermana." },
+      { en: "Where is the nearest train station?", es: "¿Dónde está la estación de tren más cercana?" },
+      { en: "He speaks three different languages fluently.", es: "Él habla tres idiomas diferentes con fluidez." },
+      { en: "We should clean the living room.", es: "Deberíamos limpiar la sala de estar." },
+      { en: "She works as a high school teacher.", es: "Ella trabaja como maestra de secundaria." },
+      { en: "I am waiting for the bus.", es: "Estoy esperando el autobús." },
+      { en: "The food tastes really delicious.", es: "La comida sabe muy deliciosa." },
+      { en: "Do not forget your coat today.", es: "No olvides tu abrigo hoy." },
+      { en: "He always arrives on time.", es: "Él siempre llega a tiempo." },
+      { en: "I lost my phone yesterday afternoon.", es: "Perdí mi teléfono ayer por la tarde." },
+      { en: "They are planning a short trip.", es: "Ellos están planeando un viaje corto." },
+      { en: "Is this seat taken right now?", es: "¿Está ocupado este asiento ahora mismo?" },
+      { en: "I will call you later tonight.", es: "Te llamaré más tarde esta noche." },
+      { en: "She bought a red leather jacket.", es: "Ella compró una chaqueta de cuero roja." },
+      { en: "We decided to stay at home.", es: "Decidimos quedarnos en casa." },
+      { en: "He can cook very well.", es: "Él sabe cocinar muy bien." },
+      { en: "The store closes at eight PM.", es: "La tienda cierra a las ocho PM." },
+      { en: "I like chocolate ice cream best.", es: "Me gusta más el helado de chocolate." },
+      { en: "They walked through the green park.", es: "Ellos caminaron por el parque verde." },
+      { en: "She is looking for her glasses.", es: "Ella está buscando sus gafas." },
+      { en: "We need to save more money.", es: "Necesitamos ahorrar más dinero." },
+      { en: "He answered all the test questions.", es: "Él respondió todas las preguntas del examen." },
+      { en: "I feel tired after working all day.", es: "Me siento cansado después de trabajar todo el día." },
+      { en: "She opened the window for fresh air.", es: "Ella abrió la ventana para entrar aire fresco." },
+      { en: "They swim in the pool often.", es: "Ellos nadan en la piscina a menudo." },
+      { en: "My computer is working very slowly.", es: "Mi computadora está funcionando muy lento." },
+      { en: "What time does the show start?", es: "¿A qué hora empieza el espectáculo?" },
+      { en: "I understand what you are saying.", es: "Entiendo lo que estás diciendo." },
+      { en: "She visits her grandmother every weekend.", es: "Ella visita a su abuela cada fin de semana." },
+      { en: "He is listening to music right now.", es: "Él está escuchando música ahora mismo." },
+      { en: "We took many photos during vacation.", es: "Tomamos muchas fotos durante las vacaciones." },
+      { en: "The cat is sleeping on the sofa.", es: "El gato está durmiendo en el sofá." },
+      { en: "I usually drink tea instead of coffee.", es: "Normalmente bebo té en lugar de café." },
+      { en: "She painted a beautiful picture yesterday.", es: "Ella pintó un cuadro hermoso ayer." },
+      { en: "They invited us to their party.", es: "Ellos nos invitaron a su fiesta." },
+      { en: "He forgot to turn off the lights.", es: "Él olvidó apagar las luces." },
+      { en: "I hope to see you soon.", es: "Espero verte pronto." },
+      { en: "The weather is warm and sunny.", es: "El clima está cálido y soleado." },
+      { en: "She studies hard for her exams.", es: "Ella estudia duro para sus exámenes." },
+      { en: "We need a new table for the kitchen.", es: "Necesitamos una mesa nueva para la cocina." },
+      { en: "He rides his bicycle to work.", es: "Él va en bicicleta al trabajo." },
+      { en: "I cannot find my wallet anywhere.", es: "No puedo encontrar mi cartera en ninguna parte." },
+      { en: "They visited a history museum last month.", es: "Ellos visitaron un museo de historia el mes pasado." },
+      { en: "She is writing an email to her boss.", es: "Ella está escribiendo un correo a su jefe." },
+      { en: "We spent the whole day outdoors.", es: "Pasamos todo el día al aire libre." },
+      { en: "He bought a warm winter hat.", es: "Él compró un gorro de invierno abrigado." },
+      { en: "I enjoy walking early in the morning.", es: "Disfruto caminar temprano por la mañana." },
+      { en: "The children are playing in the garden.", es: "Los niños están jugando en el jardín." },
+      { en: "She closed the door very quietly.", es: "Ella cerró la puerta muy silenciosamente." },
+      { en: "We order pizza every Friday night.", es: "Pedimos pizza todos los viernes por la noche." },
+      { en: "He works late on Tuesday evening.", es: "Él trabaja hasta tarde el martes por la noche." },
+      { en: "I need to practice my English speech.", es: "Necesito practicar mi discurso en inglés." },
+      { en: "They left early to avoid traffic.", es: "Se fueron temprano para evitar el tráfico." },
+      { en: "She always smiles when she sees me.", es: "Ella siempre sonríe cuando me ve." },
+      { en: "The book was better than the movie.", es: "El libro fue mejor que la película." },
+      { en: "I take the bus every morning.", es: "Tomo el autobús todas las mañanas." },
+      { en: "He wants to travel the world someday.", es: "Él quiere viajar por el mundo algún día." },
+      { en: "We are waiting for our flight now.", es: "Estamos esperando nuestro vuelo ahora." },
+      { en: "She washes her hands before eating.", es: "Ella se lava las manos antes de comer." },
+      { en: "I have a doctor appointment tomorrow.", es: "Tengo una cita médica mañana." },
+      { en: "They bought fresh fruits at the market.", es: "Ellos compraron frutas frescas en el mercado." },
+      { en: "He cleans his bedroom every Saturday.", es: "Él limpia su habitación todos los sábados." },
+      { en: "I love reading before going to sleep.", es: "Me encanta leer antes de ir a dormir." },
+      { en: "She ordered a cup of green tea.", es: "Ella pidió una taza de té verde." },
+      { en: "We must leave early tomorrow morning.", es: "Debemos salir temprano mañana por la mañana." },
+      { en: "He fixed the broken wooden chair.", es: "Él arregló la silla de madera rota." },
+      { en: "The sky looks clear and dark tonight.", es: "El cielo se ve claro y oscuro esta noche." },
+      { en: "I try to eat healthy food daily.", es: "Intento comer comida saludable a diario." },
+      { en: "She meets her friends every Friday.", es: "Ella se reúne con sus amigos todos los viernes." },
+      { en: "They are building a new shopping mall.", es: "Ellos están construyendo un nuevo centro comercial." },
+      { en: "He returned the book to the library.", es: "Él devolvió el libro a la biblioteca." },
+      { en: "I need some help with this task.", es: "Necesito algo de ayuda con esta tarea." },
+      { en: "She takes the dog for a walk.", es: "Ella saca al perro a pasear." },
+      { en: "We enjoy listening to podcasts together.", es: "Disfrutamos escuchando podcasts juntos." },
+      { en: "He bought a new pair of shoes.", es: "Él compró un nuevo par de zapatos." },
+      { en: "The lesson was easy to understand.", es: "La lección fue fácil de entender." },
+      { en: "I usually drink milk with breakfast.", es: "Normalmente bebo leche con el desayuno." },
+      { en: "She is sitting near the entrance door.", es: "Ella está sentada cerca de la puerta de entrada." },
+      { en: "They traveled to Paris last spring.", es: "Ellos viajaron a París la primavera pasada." },
+      { en: "He forgot to pack his toothbrush.", es: "Él olvidó empacar su cepillo de dientes." },
+      { en: "We are very excited about the news.", es: "Estamos muy emocionados por la noticia." },
+      { en: "Practice makes perfect in learning languages.", es: "La práctica hace al maestro en el aprendizaje de idiomas." }
+    ];
+
+    // Limpieza e interpretación de oraciones
+    const database = rawDatabase.map(item => {
+      // Limpiar puntuación básica para obtener las palabras
+      const cleanEn = item.en.replace(/[.,?!]/g, '');
+      const words = cleanEn.split(/\s+/);
+      return {
+        enOriginal: item.en,
+        es: item.es,
+        targetWords: words
+      };
+    });
+
+    // Banco de palabras aleatorias para distractores
+    const allDistractorWords = Array.from(
+      new Set(database.flatMap(item => item.targetWords))
+    );
+
+    // Estado del juego
+    let targetQuestionCount = 10;
+    let selectedQuestions = [];
+    let wrongQuestions = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let isAnsweringAllowed = true;
+    let timerInterval = null;
+    let timeLeft = 60;
+
+    let currentSelectedWords = []; // Array de { id, text }
+    let availableBankWords = [];    // Array de { id, text }
+
+    // Elementos DOM
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreen = document.getElementById('end-screen');
+
+    const questionCountDisplay = document.getElementById('question-count');
+    const btnMinus = document.getElementById('btn-minus');
+    const btnPlus = document.getElementById('btn-plus');
+    const startBtn = document.getElementById('start-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const undoBtn = document.getElementById('undo-btn');
+
+    const progressText = document.getElementById('progress-text');
+    const timerText = document.getElementById('timer-text');
+    const sentenceEsDisplay = document.getElementById('sentence-es-display');
+    const answerArea = document.getElementById('answer-area');
+    const wordsBank = document.getElementById('words-bank');
+
+    const correctCountDisplay = document.getElementById('correct-count');
+    const wrongCountDisplay = document.getElementById('wrong-count');
+    const reviewSection = document.getElementById('review-section');
+    const wrongList = document.getElementById('wrong-list');
+
+    // Stepper de preguntas
+    btnMinus.addEventListener('click', () => {
+      if (targetQuestionCount > 5) {
+        targetQuestionCount -= 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    btnPlus.addEventListener('click', () => {
+      if (targetQuestionCount < 100) {
+        targetQuestionCount += 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    // Event listeners
+    startBtn.addEventListener('click', startGame);
+    finishBtn.addEventListener('click', endGame);
+    restartBtn.addEventListener('click', resetToStart);
+    undoBtn.addEventListener('click', handleUndo);
+
+    function startGame() {
+      currentIndex = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      wrongQuestions = [];
+
+      const shuffled = [...database].sort(() => 0.5 - Math.random());
+      selectedQuestions = shuffled.slice(0, Math.min(targetQuestionCount, database.length));
+
+      startScreen.classList.remove('active');
+      gameScreen.classList.add('active');
+
+      renderQuestion();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 60;
+      timerText.textContent = `${timeLeft}s`;
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerText.textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      isAnsweringAllowed = true;
+      const currentQ = selectedQuestions[currentIndex];
+
+      progressText.textContent = `Pregunta ${currentIndex + 1} de ${selectedQuestions.length}`;
+      sentenceEsDisplay.textContent = currentQ.es;
+      
+      answerArea.className = 'answer-area';
+      currentSelectedWords = [];
+
+      // Preparar banco de palabras (Palabras correctas + distractores)
+      const targetWords = currentQ.targetWords;
+      const neededTotal = Math.max(targetWords.length + 3, 8); // Al menos 8 o 9 opciones
+      const extraNeeded = neededTotal - targetWords.length;
+
+      const extraWords = allDistractorWords
+        .filter(w => !targetWords.includes(w))
+        .sort(() => 0.5 - Math.random())
+        .slice(0, extraNeeded);
+
+      const combinedWords = [...targetWords, ...extraWords]
+        .sort(() => 0.5 - Math.random());
+
+      availableBankWords = combinedWords.map((word, idx) => ({
+        id: `word-${idx}-${Date.now()}`,
+        text: word
+      }));
+
+      renderAnswerArea();
+      renderWordsBank();
+      startTimer();
+    }
+
+    function renderAnswerArea() {
+      answerArea.innerHTML = '';
+      currentSelectedWords.forEach((wordObj, index) => {
+        const box = document.createElement('div');
+        box.className = 'word-box';
+        box.innerHTML = `
+          <span>${wordObj.text}</span>
+          <button class="remove-btn" title="Quitar palabra">✕</button>
+        `;
+
+        box.querySelector('.remove-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!isAnsweringAllowed) return;
+          removeWordFromAnswer(index);
+        });
+
+        answerArea.appendChild(box);
+      });
+    }
+
+    function renderWordsBank() {
+      wordsBank.innerHTML = '';
+      availableBankWords.forEach((wordObj) => {
+        const btn = document.createElement('button');
+        btn.className = 'bank-btn';
+        btn.textContent = wordObj.text;
+        
+        // Si ya está seleccionada, deshabilitar
+        const isSelected = currentSelectedWords.some(w => w.id === wordObj.id);
+        if (isSelected) {
+          btn.disabled = true;
+        }
+
+        btn.addEventListener('click', () => {
+          if (!isAnsweringAllowed || isSelected) return;
+          addWordToAnswer(wordObj);
+        });
+
+        wordsBank.appendChild(btn);
+      });
+    }
+
+    function addWordToAnswer(wordObj) {
+      const currentQ = selectedQuestions[currentIndex];
+      currentSelectedWords.push(wordObj);
+      renderAnswerArea();
+      renderWordsBank();
+
+      // Si alcanzamos la cantidad de palabras necesarias para la oración objetivo
+      if (currentSelectedWords.length === currentQ.targetWords.length) {
+        validateAnswer();
+      }
+    }
+
+    function removeWordFromAnswer(index) {
+      currentSelectedWords.splice(index, 1);
+      renderAnswerArea();
+      renderWordsBank();
+    }
+
+    function handleUndo() {
+      if (!isAnsweringAllowed || currentSelectedWords.length === 0) return;
+      currentSelectedWords.pop();
+      renderAnswerArea();
+      renderWordsBank();
+    }
+
+    function validateAnswer() {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+      clearInterval(timerInterval);
+
+      const currentQ = selectedQuestions[currentIndex];
+      const userSentence = currentSelectedWords.map(w => w.text).join(' ');
+      const targetSentence = currentQ.targetWords.join(' ');
+
+      if (userSentence === targetSentence) {
+        answerArea.classList.add('correct-state');
+        correctCount++;
+      } else {
+        answerArea.classList.add('wrong-state');
+        wrongCount++;
+        wrongQuestions.push(currentQ);
+      }
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1300);
+    }
+
+    function handleTimeout() {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+
+      const currentQ = selectedQuestions[currentIndex];
+      answerArea.classList.add('wrong-state');
+      wrongCount++;
+      wrongQuestions.push(currentQ);
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1300);
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      gameScreen.classList.remove('active');
+      endScreen.classList.add('active');
+
+      correctCountDisplay.textContent = correctCount;
+      wrongCountDisplay.textContent = wrongCount;
+
+      if (wrongQuestions.length > 0) {
+        reviewSection.style.display = 'block';
+        wrongList.innerHTML = wrongQuestions.map(item => `
+          <div class="wrong-item">
+            <span class="wrong-item-sentence">${item.enOriginal}</span>
+            <span class="wrong-item-translation">${item.es}</span>
+          </div>
+        `).join('');
+      } else {
+        reviewSection.style.display = 'none';
+        wrongList.innerHTML = '';
+      }
+    }
+
+    function resetToStart() {
+      clearInterval(timerInterval);
+      endScreen.classList.remove('active');
+      startScreen.classList.add('active');
+    }
+  </script>
+
+  <!-- Script para Etiqueta Auto-Inyectada de Nombre de Juego -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const endScreen = document.getElementById("end-screen");
+      const title = endScreen ? endScreen.querySelector("h1") : null;
+
+      if (title) {
+        const gameBadge = document.createElement("span");
+        gameBadge.textContent = "Sentence Fill - Easy";
+        
+        Object.assign(gameBadge.style, {
+          display: "inline-block",
+          alignSelf: "center",
+          backgroundColor: "var(--tag-bg, #d1fae5)",
+          color: "var(--tag-text, #047857)",
+          fontWeight: "700",
+          fontSize: "0.85rem",
+          padding: "4px 12px",
+          borderRadius: "20px",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          marginTop: "8px",
+          marginBottom: "12px"
+        });
+
+        title.insertAdjacentElement("afterend", gameBadge);
+      }
+    });
+  </script>
+
+  <!-- Script de Captura / Compartir -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const endScreen = document.getElementById("end-screen");
+      const restartBtn = document.getElementById("restart-btn");
+
+      if (endScreen && restartBtn) {
+        const shareBtn = document.createElement("button");
+        shareBtn.textContent = "📸 Guardar / Compartir";
+        shareBtn.className = "btn-primary";
+        
+        Object.assign(shareBtn.style, {
+          backgroundColor: "#2563eb",
+          marginTop: "10px"
+        });
+
+        restartBtn.parentNode.insertBefore(shareBtn, restartBtn);
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        shareBtn.addEventListener("click", async () => {
+          shareBtn.style.display = "none";
+          restartBtn.style.display = "none";
+
+          try {
+            const canvas = await html2canvas(document.querySelector(".container"), {
+              scale: 2,
+              backgroundColor: "#ffffff",
+              useCORS: true
+            });
+
+            shareBtn.style.display = "block";
+            restartBtn.style.display = "block";
+
+            if (isMobile && navigator.share && navigator.canShare) {
+              canvas.toBlob(async (blob) => {
+                if (!blob) throw new Error("No se pudo generar el blob");
+                const file = new File([blob], "mi-resultado.png", { type: "image/png" });
+
+                if (navigator.canShare({ files: [file] })) {
+                  await navigator.share({
+                    title: "¡Mi resultado!",
+                    text: "¡Mira cómo me fue en el juego!",
+                    files: [file]
+                  });
+                  return;
+                }
+                downloadImage(canvas);
+              }, "image/png");
+            } else {
+              downloadImage(canvas);
+            }
+          } catch (err) {
+            shareBtn.style.display = "block";
+            restartBtn.style.display = "block";
+            console.error("Error al procesar captura:", err);
+            alert("Ocurrió un error al generar la imagen.");
+          }
+        });
+
+        function downloadImage(canvas) {
+          const imageURI = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.download = "mi-resultado.png";
+          link.href = imageURI;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentence Fill - Advanced Level</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --accent-light: #e0f2fe;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --correct: #10b981;
+      --correct-bg: #ecfdf5;
+      --wrong: #ef4444;
+      --wrong-bg: #fef2f2;
+      --border: #e2e8f0;
+      --timer-bg: #fee2e2;
+      --timer-text: #dc2626;
+      --tag-text: #0369a1;
+      --tag-bg: #e0f2fe;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 550px;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* Selector de Preguntas */
+    .selector-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      background-color: #f1f5f9;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .stepper button {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .stepper button:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    .stepper span {
+      font-size: 1.4rem;
+      font-weight: 600;
+      width: 70px;
+      text-align: center;
+    }
+
+    /* Botones generales */
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+      }
+    }
+
+    .btn-danger {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-danger:hover {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+    }
+
+    .btn-secondary {
+      background-color: #f1f5f9;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-secondary:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    /* Interfaz de Juego */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+
+    .progress {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .timer-badge {
+      background-color: var(--timer-bg);
+      color: var(--timer-text);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #fca5a5;
+    }
+
+    .sentence-box {
+      text-align: center;
+      padding: 20px 16px;
+      background-color: #f8fafc;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+    }
+
+    .sentence-es {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* Área de Cuadritos de Respuesta */
+    .answer-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .answer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .answer-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .answer-area {
+      min-height: 85px;
+      background-color: #ffffff;
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-content: flex-start;
+      transition: all 0.2s;
+    }
+
+    .answer-area.correct-state {
+      border-color: var(--correct);
+      background-color: var(--correct-bg);
+    }
+
+    .answer-area.wrong-state {
+      border-color: var(--wrong);
+      background-color: var(--wrong-bg);
+    }
+
+    /* Cuadritos agregados a la respuesta */
+    .word-box {
+      background-color: #e0f2fe;
+      border: 1px solid #38bdf8;
+      color: #0369a1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      animation: popIn 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .word-box .remove-btn {
+      background: rgba(3, 105, 161, 0.1);
+      border: none;
+      color: #0369a1;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    @media (hover: hover) {
+      .word-box .remove-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--wrong);
+      }
+    }
+
+    /* Banco de Palabras */
+    .words-bank-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .words-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .bank-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .bank-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background-color: var(--accent-light);
+        color: var(--tag-text);
+      }
+    }
+
+    .bank-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      border-style: dashed;
+    }
+
+    /* Pantalla Final */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .stat-card {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card.correct-card { border-color: #a7f3d0; background-color: #ecfdf5; }
+    .stat-card.wrong-card { border-color: #fca5a5; background-color: #fef2f2; }
+
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .correct-card .stat-value { color: var(--correct); }
+    .wrong-card .stat-value { color: var(--wrong); }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .wrong-list-container {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .wrong-item {
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.9rem;
+    }
+
+    .wrong-item-sentence {
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .wrong-item-translation {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 1. PANTALLA INICIAL -->
+    <div id="start-screen" class="screen active">
+      <h1>Sentence Fill - Advanced</h1>
+      <p class="subtitle">🔥 Ordena las palabras en inglés para formar oraciones avanzadas 🔥</p>
+      
+      <div class="selector-group">
+        <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">¿Cuántas oraciones deseas practicar?</label>
+        <div class="stepper">
+          <button id="btn-minus">-</button>
+          <span id="question-count">10</span>
+          <button id="btn-plus">+</button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary">¡Comenzar Juego!</button>
+      <a href="index.html" class="btn-secondary" style="text-decoration: none; text-align: center; margin-top: 5px;">← Menú Principal</a>
+    </div>
+
+    <!-- 2. PANTALLA DEL JUEGO -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <span class="progress" id="progress-text">Pregunta 1 de 10</span>
+        <div class="timer-badge">⏱️ <span id="timer-text">60s</span></div>
+        <button id="finish-btn" class="btn-danger">Finalizar</button>
+      </div>
+
+      <div class="sentence-box">
+        <div class="sentence-es" id="sentence-es-display">Su argumento matizado alteró profundamente la perspectiva del panel.</div>
+      </div>
+
+      <div class="answer-section">
+        <div class="answer-header">
+          <span class="answer-title">Tu respuesta:</span>
+          <button id="undo-btn" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">⬅ Deshacer</button>
+        </div>
+        <div class="answer-area" id="answer-area">
+          <!-- Cuadritos colocados -->
+        </div>
+      </div>
+
+      <div class="words-bank-container">
+        <span class="answer-title" style="text-align: center; display: block;">Selecciona las palabras:</span>
+        <div class="words-bank" id="words-bank">
+          <!-- Botones de palabras desordenadas -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. PANTALLA DE RESULTADOS -->
+    <div id="end-screen" class="screen">
+      <h1>¡Juego Terminado!</h1>
+      <p class="subtitle" id="final-status-text">Resumen de tu partida:</p>
+
+      <div class="results-grid">
+        <div class="stat-card correct-card">
+          <div class="stat-value" id="correct-count">0</div>
+          <div class="stat-label">Correctas</div>
+        </div>
+        <div class="stat-card wrong-card">
+          <div class="stat-value" id="wrong-count">0</div>
+          <div class="stat-label">Incorrectas</div>
+        </div>
+      </div>
+
+      <div id="review-section" style="display: none;">
+        <h3 style="font-size: 1.1rem; color: var(--text); font-weight: 700; margin-bottom: 8px;">Oraciones para reforzar:</h3>
+        <div class="wrong-list-container" id="wrong-list"></div>
+      </div>
+
+      <button id="restart-btn" class="btn-primary">Jugar de nuevo</button>
+      <a href="index.html" class="btn-secondary" style="text-decoration: none; text-align: center; margin-top: 5px;">← Menú Principal</a>
+    </div>
+  </div>
+
+  <script>
+    // Base de Datos de 100 Oraciones Nivel Avanzado
+    const rawDatabase = [
+      { en: "Her nuanced argument profoundly altered the panel's perspective.", es: "Su argumento matizado alteró profundamente la perspectiva del panel." },
+      { en: "The company meticulously adhered to the stringent regulatory framework.", es: "La empresa se adhirió meticulosamente al estricto marco regulatorio." },
+      { en: "He articulates complex technical concepts with utmost clarity.", es: "Él articula conceptos técnicos complejos con la máxima claridad." },
+      { en: "We must critically scrutinize the underlying assumptions before proceeding.", es: "Debemos escudriñar críticamente los supuestos subyacentes antes de proceder." },
+      { en: "Her eloquent discourse resonated deeply across the diverse audience.", es: "Su elocuente discurso resonó profundamente en la diversa audiencia." },
+      { en: "The unprecedented economic downturn triggered widespread fiscal restructuring.", es: "La desaceleración económica sin precedentes desencadenó una reestructuración fiscal generalizada." },
+      { en: "He possesses an innate capacity for resolving volatile disputes.", es: "Él posee una capacidad innata para resolver disputas volátiles." },
+      { en: "They unwittingly perpetuated a deeply entrenched historical myth.", es: "Involuntariamente perpetuaron un mito histórico profundamente arraigado." },
+      { en: "She demonstrated unparalleled resilience throughout the laborious process.", es: "Demostró una resiliencia sin igual a lo largo del laborioso proceso." },
+      { en: "The evidence implicitly contradicts the initial scientific hypothesis.", es: "La evidencia contradice implícitamente la hipótesis científica inicial." },
+      { en: "He inadvertently disclosed sensitive parameters during the interview.", es: "Reveló inadvertidamente parámetros sensibles durante la entrevista." },
+      { en: "Such volatile market fluctuations require agile organizational strategies.", es: "Tales fluctuaciones volátiles del mercado requieren estrategias organizacionales ágiles." },
+      { en: "She meticulously curated the exhibition with paramount precision.", es: "Ella curó meticulosamente la exposición con suma precisión." },
+      { en: "The treaty effectively circumvents potential international legal disputes.", es: "El tratado elude eficazmente posibles disputas legales internacionales." },
+      { en: "His ubiquitous influence is palpable throughout the organization.", es: "Su influencia ubicua es palpable en toda la organización." },
+      { en: "They embarked on an ambitious endeavor to overhaul infrastructure.", es: "Se embarcaron en un ambicioso esfuerzo para reestructurar la infraestructura." },
+      { en: "She succinctly synthesized the chaotic research into actionable steps.", es: "Sintetizó sucintamente la investigación caótica en pasos accionables." },
+      { en: "He displayed conspicuous reluctance when signing the binding agreement.", es: "Mostró una conspicua renuencia al firmar el acuerdo vinculante." },
+      { en: "The policy inadvertently exacerbated existing socio-economic disparities.", es: "La política exacerbó inadvertidamente las disparidades socioeconómicas existentes." },
+      { en: "We must foster an environment conducive to innovation.", es: "Debemos fomentar un entorno propicio para la innovación." },
+      { en: "Her paramount concern remains the absolute security of data.", es: "Su primordial preocupación sigue siendo la seguridad absoluta de los datos." },
+      { en: "He handled the intricate negotiations with remarkable tact.", es: "Manejó las intrincadas negociaciones con un tacto notable." },
+      { en: "The software architecture exhibits exceptional scalability under load.", es: "La arquitectura del software exhibe una escalabilidad excepcional bajo carga." },
+      { en: "She holds an unequivocal commitment to ethical leadership.", es: "Ella mantiene un compromiso inequívoco con el liderazgo ético." },
+      { en: "They arrived at a consensus after protracted deliberation.", es: "Llegaron a un consenso tras una prolongada deliberación." },
+      { en: "The empirical findings validate our initial speculative model.", es: "Los hallazgos empíricos validan nuestro modelo especulativo inicial." },
+      { en: "He seamlessly incorporated feedback into the revised protocol.", es: "Incorporó sin problemas los comentarios en el protocolo revisado." },
+      { en: "Her insightful critique dismantled the flawed theoretical construct.", es: "Su perspicaz crítica desmanteló la defectuosa construcción teórica." },
+      { en: "The system encountered a subtle yet catastrophic anomaly.", es: "El sistema encontró una sutileza que resultó ser una anomalía catastrófica." },
+      { en: "They sought to mitigate the adverse effects immediately.", es: "Buscaron mitigar los efectos adversos de inmediato." },
+      { en: "He manifested an overt disdain for bureaucratic inefficiencies.", es: "Manifestó un desdén abierto por las ineficiencias burocráticas." },
+      { en: "The proposal lacks sufficient empirical backing to succeed.", es: "La propuesta carece de suficiente respaldo empírico para tener éxito." },
+      { en: "She navigated the perilous political landscape with finesse.", es: "Navegó por el peligroso panorama político con sutileza." },
+      { en: "His rhetoric subtly manipulated public perception regarding taxes.", es: "Su retórica manipuló sutilmente la percepción pública respecto a los impuestos." },
+      { en: "The contract explicitly prohibits unauthorized dissemination of intellectual property.", es: "El contrato prohíbe explícitamente la divulgación no autorizada de propiedad intelectual." },
+      { en: "We encountered an unprecedented predicament during deployment.", es: "Encontramos un dilema sin precedentes durante el despliegue." },
+      { en: "She epitomizes the core principles of visionary design.", es: "Ella personifica los principios fundamentales del diseño visionario." },
+      { en: "His ambiguous statement triggered widespread media speculation.", es: "Su declaración ambigua desató una gran especulación mediática." },
+      { en: "They forged a lucrative alliance amidst market volatility.", es: "Forjaron una alianza lucrativa en medio de la volatilidad del mercado." },
+      { en: "She retains a profound grasp of quantum mechanics.", es: "Ella mantiene un dominio profundo de la mecánica cuántica." },
+      { en: "The research highlights a fundamental paradigm shift worldwide.", es: "La investigación destaca un cambio de paradigma fundamental a nivel mundial." },
+      { en: "He was thoroughly vindicated by subsequent independent investigation.", es: "Fue completamente vindicado por la subsiguiente investigación independiente." },
+      { en: "We observed a gradual degradation of performance over time.", es: "Observamos una degradación gradual del rendimiento con el tiempo." },
+      { en: "Her meticulous attention to detail ensures flawless execution.", es: "Su meticulosa atención al detalle garantiza una ejecución impecable." },
+      { en: "The narrative seamlessly weaves fact with evocative fiction.", es: "La narrativa entreteje sin costuras la realidad con la ficción evocadora." },
+      { en: "He holds an intrinsically optimistic outlook on life.", es: "Él mantiene una perspectiva intrínsecamente optimista sobre la vida." },
+      { en: "The strategy effectively leverages synergistic interdepartmental capabilities.", es: "La estrategia aprovecha eficazmente las capacidades interdepartamentales sinérgicas." },
+      { en: "She faced severe adversity with unfaltering determination.", es: "Enfrentó una severa adversidad con una determinación inquebrantable." },
+      { en: "They meticulously audited the financial transactions for discrepancies.", es: "Auditaron meticulosamente las transacciones financieras en busca de discrepancias." },
+      { en: "His persistent skepticism hindered collaborative project progress.", es: "Su escepticismo persistente obstaculizó el progreso colaborativo del proyecto." },
+      { en: "The phenomenon remains fundamentally enigmatic despite research.", es: "El fenómeno sigue siendo fundamentalmente enigmático a pesar de las investigaciones." },
+      { en: "She deftly defused the potentially explosive conversation.", es: "Ella desactivó hábilmente la conversación potencialmente explosiva." },
+      { en: "We must curb our consumption to prevent depletion.", es: "Debemos frenar nuestro consumo para prevenir el agotamiento." },
+      { en: "His artistic work encapsulates the prevailing cultural zeitgeist.", es: "Su obra artística encapsula el espíritu cultural predominante." },
+      { en: "The team established a highly sophisticated analytical framework.", es: "El equipo estableció un marco analítico altamente sofisticado." },
+      { en: "She voiced profound reservations regarding the proposed strategy.", es: "Ella expresó profundas reservas respecto a la estrategia propuesta." },
+      { en: "The decision exerted a detrimental impact on revenue.", es: "La decisión ejerció un impacto perjudicial en los ingresos." },
+      { en: "He displays a penchant for taking calculated risks.", es: "Él muestra una inclinación por asumir riesgos calculados." },
+      { en: "The system maintains redundant backups to prevent downtime.", es: "El sistema mantiene respaldos redundantes para evitar interrupciones." },
+      { en: "She offered a compelling justification for the expenditure.", es: "Ella ofreció una justificación convincente para el gasto." },
+      { en: "Their mutual animosity thwarted any meaningful compromise.", es: "Su animosidad mutua frustró cualquier acuerdo significativo." },
+      { en: "He spearheaded the radical transformation of the department.", es: "Él lideró la transformación radical del departamento." },
+      { en: "The initiative aims to alleviate endemic structural poverty.", es: "La iniciativa pretende aliviar la pobreza estructural endémica." },
+      { en: "She delivered a remarkably lucid summary of events.", es: "Ella entregó un resumen de los hechos sorprendentemente lúcido." },
+      { en: "The findings are intrinsically linked to economic policy.", es: "Los hallazgos están intrínsecamente vinculados a la política económica." },
+      { en: "He encountered fierce resistance from established stakeholders.", es: "Encontró una feroz resistencia por parte de los actores consolidados." },
+      { en: "We must address this pervasive issue systematically.", es: "Debemos abordar este problema omnipresente de manera sistemática." },
+      { en: "Her unwavering integrity earned universal admiration across peers.", es: "Su inquebrantable integridad se ganó la admiración universal de sus pares." },
+      { en: "The document contained several glaring factual inconsistencies.", es: "El documento contenía varias inconsistencias fácticas evidentes." },
+      { en: "He masterfully orchestrated a comprehensive rebranding campaign.", es: "Él orquestó magistralmente una campaña integral de reposicionamiento." },
+      { en: "The technological breakthrough rendered traditional methods obsolete.", es: "El avance tecnológico volvió obsoletos los métodos tradicionales." },
+      { en: "She exhibited profound empathy during the tragic crisis.", es: "Ella exhibió una profunda empatía durante la trágica crisis." },
+      { en: "They operated under the covert supervision of authorities.", es: "Operaban bajo la supervisión encubierta de las autoridades." },
+      { en: "His hypothesis generated intense debate among academic scholars.", es: "Su hipótesis generó un intenso debate entre los académicos." },
+      { en: "We must carefully weigh the implicit tradeoffs involved.", es: "Debemos sopesar cuidadosamente las compensaciones implícitas involucradas." },
+      { en: "She effortlessly managed the daunting operational workload.", es: "Ella manejó sin esfuerzo la abrumadora carga de trabajo operativo." },
+      { en: "The contract remains contingent upon mandatory regulatory approval.", es: "El contrato sigue sujeto a la aprobación regulatoria obligatoria." },
+      { en: "He expressed deep remorse for his reckless conduct.", es: "Él expresó un profundo remordimiento por su conducta imprudente." },
+      { en: "The algorithm optimizes bandwidth utilization dynamically.", es: "El algoritmo optimiza el uso del ancho de banda de forma dinámica." },
+      { en: "She possesses an uncanny ability to predict trends.", es: "Ella posee una capacidad asombrosa para predecir tendencias." },
+      { en: "Their reckless expansion provoked immediate financial turmoil.", es: "Su expansión imprudente provocó un convulso caos financiero inmediato." },
+      { en: "He challenged the deeply entrenched dogma of management.", es: "Desafió el dogma profundamente arraigado de la gerencia." },
+      { en: "The study illustrates the interconnectedness of global ecosystems.", es: "El estudio ilustra la interconexión de los ecosistemas globales." },
+      { en: "She maintains an impeccably spotless professional record.", es: "Ella mantiene un historial profesional impecablemente limpio." },
+      { en: "They encountered an insurmountable legal hurdle during proceedings.", es: "Encontraron un obstáculo legal insuperable durante los procedimientos." },
+      { en: "His subtle satire exposed the hypocrisy of political institutions.", es: "Su sátira sutil expuso la hipocresía de las instituciones políticas." },
+      { en: "We must adopt a proactive stance toward cybersecurity.", es: "Debemos adoptar una postura proactiva hacia la ciberseguridad." },
+      { en: "She offered an astute observation regarding market behaviors.", es: "Ella ofreció una astuta observación respecto a los comportamientos del mercado." },
+      { en: "The crisis precipitated a complete overhaul of leadership.", es: "La crisis precipitó una reestructuración completa del liderazgo." },
+      { en: "He navigated the ethical dilemma with unwavering principle.", es: "Navegó el dilema ético con un principio inquebrantable." },
+      { en: "The software features an intuitively seamless user interface.", es: "El software cuenta con una interfaz de usuario intuitivamente fluida." },
+      { en: "She delivered a poignant eulogy honoring her mentor.", es: "Ella pronunció un emotivo elogio fúnebre honrando a su mentor." },
+      { en: "They implemented rigorous measures to safeguard data privacy.", es: "Implementaron medidas rigurosas para salvaguardar la privacidad de datos." },
+      { en: "His arrogant demeanor alienated potential business partners.", es: "Su conducta arrogante distanció a potenciales socios comerciales." },
+      { en: "We cannot overlook the broader geopolitical ramifications.", es: "No podemos pasar por alto las ramificaciones geopolíticas más amplias." },
+      { en: "She demonstrated sophisticated mastery over advanced algorithms.", es: "Demostró un dominio sofisticado sobre algoritmos avanzados." },
+      { en: "The report highlights widespread systemic institutional failure.", es: "El informe destaca un fallo institucional sistémico generalizado." },
+      { en: "He remains steadfast in his pursuit of truth.", es: "Él permanece firme en su búsqueda de la verdad." },
+      { en: "The discovery holds profound implications for modern astrophysics.", es: "El descubrimiento tiene profundas implicaciones para la astrofísica moderna." },
+      { en: "Mastery requires relentless dedication to deliberate practice.", es: "El dominio requiere una dedicación incansable a la práctica deliberada." }
+    ];
+
+    // Limpieza e interpretación de oraciones
+    const database = rawDatabase.map(item => {
+      // Limpiar puntuación básica para obtener las palabras
+      const cleanEn = item.en.replace(/[.,?!]/g, '');
+      const words = cleanEn.split(/\s+/);
+      return {
+        enOriginal: item.en,
+        es: item.es,
+        targetWords: words
+      };
+    });
+
+    // Banco de palabras aleatorias para distractores
+    const allDistractorWords = Array.from(
+      new Set(database.flatMap(item => item.targetWords))
+    );
+
+    // Estado del juego
+    let targetQuestionCount = 10;
+    let selectedQuestions = [];
+    let wrongQuestions = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let isAnsweringAllowed = true;
+    let timerInterval = null;
+    let timeLeft = 60;
+
+    let currentSelectedWords = []; // Array de { id, text }
+    let availableBankWords = [];    // Array de { id, text }
+
+    // Elementos DOM
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreen = document.getElementById('end-screen');
+
+    const questionCountDisplay = document.getElementById('question-count');
+    const btnMinus = document.getElementById('btn-minus');
+    const btnPlus = document.getElementById('btn-plus');
+    const startBtn = document.getElementById('start-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const undoBtn = document.getElementById('undo-btn');
+
+    const progressText = document.getElementById('progress-text');
+    const timerText = document.getElementById('timer-text');
+    const sentenceEsDisplay = document.getElementById('sentence-es-display');
+    const answerArea = document.getElementById('answer-area');
+    const wordsBank = document.getElementById('words-bank');
+
+    const correctCountDisplay = document.getElementById('correct-count');
+    const wrongCountDisplay = document.getElementById('wrong-count');
+    const reviewSection = document.getElementById('review-section');
+    const wrongList = document.getElementById('wrong-list');
+
+    // Stepper de preguntas
+    btnMinus.addEventListener('click', () => {
+      if (targetQuestionCount > 5) {
+        targetQuestionCount -= 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    btnPlus.addEventListener('click', () => {
+      if (targetQuestionCount < 100) {
+        targetQuestionCount += 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    // Event listeners
+    startBtn.addEventListener('click', startGame);
+    finishBtn.addEventListener('click', endGame);
+    restartBtn.addEventListener('click', resetToStart);
+    undoBtn.addEventListener('click', handleUndo);
+
+    function startGame() {
+      currentIndex = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      wrongQuestions = [];
+
+      const shuffled = [...database].sort(() => 0.5 - Math.random());
+      selectedQuestions = shuffled.slice(0, Math.min(targetQuestionCount, database.length));
+
+      startScreen.classList.remove('active');
+      gameScreen.classList.add('active');
+
+      renderQuestion();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 60;
+      timerText.textContent = `${timeLeft}s`;
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerText.textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      isAnsweringAllowed = true;
+      const currentQ = selectedQuestions[currentIndex];
+
+      progressText.textContent = `Pregunta ${currentIndex + 1} de ${selectedQuestions.length}`;
+      sentenceEsDisplay.textContent = currentQ.es;
+      
+      answerArea.className = 'answer-area';
+      currentSelectedWords = [];
+
+      // Preparar banco de palabras (Palabras correctas + distractores)
+      const targetWords = currentQ.targetWords;
+      const neededTotal = Math.max(targetWords.length + 4, 12); // Más distractores para nivel avanzado
+      const extraNeeded = neededTotal - targetWords.length;
+
+      const extraWords = allDistractorWords
+        .filter(w => !targetWords.includes(w))
+        .sort(() => 0.5 - Math.random())
+        .slice(0, extraNeeded);
+
+      const combinedWords = [...targetWords, ...extraWords]
+        .sort(() => 0.5 - Math.random());
+
+      availableBankWords = combinedWords.map((word, idx) => ({
+        id: `word-${idx}-${Date.now()}`,
+        text: word
+      }));
+
+      renderAnswerArea();
+      renderWordsBank();
+      startTimer();
+    }
+
+    function renderAnswerArea() {
+      answerArea.innerHTML = '';
+      currentSelectedWords.forEach((wordObj, index) => {
+        const box = document.createElement('div');
+        box.className = 'word-box';
+        box.innerHTML = `
+          <span>${wordObj.text}</span>
+          <button class="remove-btn" title="Quitar palabra">✕</button>
+        `;
+
+        box.querySelector('.remove-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!isAnsweringAllowed) return;
+          removeWordFromAnswer(index);
+        });
+
+        answerArea.appendChild(box);
+      });
+    }
+
+    function renderWordsBank() {
+      wordsBank.innerHTML = '';
+      availableBankWords.forEach((wordObj) => {
+        const btn = document.createElement('button');
+        btn.className = 'bank-btn';
+        btn.textContent = wordObj.text;
+        
+        // Si ya está seleccionada, deshabilitar
+        const isSelected = currentSelectedWords.some(w => w.id === wordObj.id);
+        if (isSelected) {
+          btn.disabled = true;
+        }
+
+        btn.addEventListener('click', () => {
+          if (!isAnsweringAllowed || isSelected) return;
+          addWordToAnswer(wordObj);
+        });
+
+        wordsBank.appendChild(btn);
+      });
+    }
+
+    function addWordToAnswer(wordObj) {
+      const currentQ = selectedQuestions[currentIndex];
+      currentSelectedWords.push(wordObj);
+      renderAnswerArea();
+      renderWordsBank();
+
+      // Si alcanzamos la cantidad de palabras necesarias para la oración objetivo
+      if (currentSelectedWords.length === currentQ.targetWords.length) {
+        validateAnswer();
+      }
+    }
+
+    function removeWordFromAnswer(index) {
+      currentSelectedWords.splice(index, 1);
+      renderAnswerArea();
+      renderWordsBank();
+    }
+
+    function handleUndo() {
+      if (!isAnsweringAllowed || currentSelectedWords.length === 0) return;
+      currentSelectedWords.pop();
+      renderAnswerArea();
+      renderWordsBank();
+    }
+
+    function validateAnswer() {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+      clearInterval(timerInterval);
+
+      const currentQ = selectedQuestions[currentIndex];
+      const userSentence = currentSelectedWords.map(w => w.text).join(' ');
+      const targetSentence = currentQ.targetWords.join(' ');
+
+      if (userSentence === targetSentence) {
+        answerArea.classList.add('correct-state');
+        correctCount++;
+      } else {
+        answerArea.classList.add('wrong-state');
+        wrongCount++;
+        wrongQuestions.push(currentQ);
+      }
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1300);
+    }
+
+    function handleTimeout() {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+
+      const currentQ = selectedQuestions[currentIndex];
+      answerArea.classList.add('wrong-state');
+      wrongCount++;
+      wrongQuestions.push(currentQ);
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1300);
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      gameScreen.classList.remove('active');
+      endScreen.classList.add('active');
+
+      correctCountDisplay.textContent = correctCount;
+      wrongCountDisplay.textContent = wrongCount;
+
+      if (wrongQuestions.length > 0) {
+        reviewSection.style.display = 'block';
+        wrongList.innerHTML = wrongQuestions.map(item => `
+          <div class="wrong-item">
+            <span class="wrong-item-sentence">${item.enOriginal}</span>
+            <span class="wrong-item-translation">${item.es}</span>
+          </div>
+        `).join('');
+      } else {
+        reviewSection.style.display = 'none';
+        wrongList.innerHTML = '';
+      }
+    }
+
+    function resetToStart() {
+      clearInterval(timerInterval);
+      endScreen.classList.remove('active');
+      startScreen.classList.add('active');
+    }
+  </script>
+
+  <!-- Script para Etiqueta Auto-Inyectada de Nombre de Juego -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const endScreen = document.getElementById("end-screen");
+      const title = endScreen ? endScreen.querySelector("h1") : null;
+
+      if (title) {
+        const gameBadge = document.createElement("span");
+        gameBadge.textContent = "Sentence Fill - Advanced";
+        
+        Object.assign(gameBadge.style, {
+          display: "inline-block",
+          alignSelf: "center",
+          backgroundColor: "var(--tag-bg, #e0f2fe)",
+          color: "var(--tag-text, #0369a1)",
+          fontWeight: "700",
+          fontSize: "0.85rem",
+          padding: "4px 12px",
+          borderRadius: "20px",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          marginTop: "8px",
+          marginBottom: "12px"
+        });
+
+        title.insertAdjacentElement("afterend", gameBadge);
+      }
+    });
+  </script>
+
+  <!-- Script de Captura / Compartir -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const endScreen = document.getElementById("end-screen");
+      const restartBtn = document.getElementById("restart-btn");
+
+      if (endScreen && restartBtn) {
+        const shareBtn = document.createElement("button");
+        shareBtn.textContent = "📸 Guardar / Compartir";
+        shareBtn.className = "btn-primary";
+        
+        Object.assign(shareBtn.style, {
+          backgroundColor: "#2563eb",
+          marginTop: "10px"
+        });
+
+        restartBtn.parentNode.insertBefore(shareBtn, restartBtn);
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        shareBtn.addEventListener("click", async () => {
+          shareBtn.style.display = "none";
+          restartBtn.style.display = "none";
+
+          try {
+            const canvas = await html2canvas(document.querySelector(".container"), {
+              scale: 2,
+              backgroundColor: "#ffffff",
+              useCORS: true
+            });
+
+            shareBtn.style.display = "block";
+            restartBtn.style.display = "block";
+
+            if (isMobile && navigator.share && navigator.canShare) {
+              canvas.toBlob(async (blob) => {
+                if (!blob) throw new Error("No se pudo generar el blob");
+                const file = new File([blob], "mi-resultado.png", { type: "image/png" });
+
+                if (navigator.canShare({ files: [file] })) {
+                  await navigator.share({
+                    title: "¡Mi resultado!",
+                    text: "¡Mira cómo me fue en el juego!",
+                    files: [file]
+                  });
+                  return;
+                }
+                downloadImage(canvas);
+              }, "image/png");
+            } else {
+              downloadImage(canvas);
+            }
+          } catch (err) {
+            shareBtn.style.display = "block";
+            restartBtn.style.display = "block";
+            console.error("Error al procesar captura:", err);
+            alert("Ocurrió un error al generar la imagen.");
+          }
+        });
+
+        function downloadImage(canvas) {
+          const imageURI = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.download = "mi-resultado.png";
+          link.href = imageURI;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

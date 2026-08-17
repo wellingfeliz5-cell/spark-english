@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentence Fill - Menú de Niveles</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      
+      /* Colores por nivel */
+      --easy-color: #10b981;
+      --easy-bg: #ecfdf5;
+      --easy-border: #a7f3d0;
+      
+      --mid-color: #0284c7;
+      --mid-bg: #e0f2fe;
+      --mid-border: #bae6fd;
+      
+      --diff-color: #8b5cf6;
+      --diff-bg: #f5f3ff;
+      --diff-border: #ddd6fe;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px;
+      padding: 32px 28px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .header {
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .level-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .level-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-radius: 14px;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid transparent;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .level-card:active {
+      transform: scale(0.98);
+    }
+
+    .level-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .level-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .level-desc {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      font-weight: 500;
+    }
+
+    .arrow-icon {
+      font-size: 1.2rem;
+      font-weight: 700;
+      transition: transform 0.2s;
+    }
+
+    /* Estilos específicos para cada nivel */
+    .level-easy {
+      background-color: var(--easy-bg);
+      border-color: var(--easy-border);
+      color: var(--easy-color);
+    }
+
+    .level-mid {
+      background-color: var(--mid-bg);
+      border-color: var(--mid-border);
+      color: var(--mid-color);
+    }
+
+    .level-diff {
+      background-color: var(--diff-bg);
+      border-color: var(--diff-border);
+      color: var(--diff-color);
+    }
+
+    @media (hover: hover) {
+      .level-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .level-card:hover .arrow-icon {
+        transform: translateX(4px);
+      }
+    }
+
+    .btn-secondary {
+      background-color: #f1f5f9;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      transition: all 0.2s;
+      margin-top: 10px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (hover: hover) {
+      .btn-secondary:hover {
+        background-color: #e2e8f0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Sentence Fill</h1>
+      <p>Selecciona la dificultad para comenzar</p>
+    </div>
+
+    <div class="level-list">
+      <!-- Nivel Fácil -->
+      <a href="organ-easy.html" class="level-card level-easy">
+        <div class="level-info">
+          <span class="level-title">🟢 Básico (Easy)</span>
+          <span class="level-desc">Oraciones cortas e intuitivas</span>
+        </div>
+        <span class="arrow-icon">➔</span>
+      </a>
+
+      <!-- Nivel Intermedio -->
+      <a href="organ-mid.html" class="level-card level-mid">
+        <div class="level-info">
+          <span class="level-title">🔵 Intermedio (Mid)</span>
+          <span class="level-desc">Estructuras y tiempos variados</span>
+        </div>
+        <span class="arrow-icon">➔</span>
+      </a>
+
+      <!-- Nivel Avanzado -->
+      <a href="organ-diff.html" class="level-card level-diff">
+        <div class="level-info">
+          <span class="level-title">🔥 Avanzado (Difficult)</span>
+          <span class="level-desc">Vocabulario y sintaxis compleja</span>
+        </div>
+        <span class="arrow-icon">➔</span>
+      </a>
+    </div>
+
+    <a href="index.html" class="btn-secondary">← Menú Principal</a>
+  </div>
+
+</body>
+</html>

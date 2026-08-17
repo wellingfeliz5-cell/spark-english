@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentence Fill - Advanced Level</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --correct: #10b981;
+      --correct-bg: #ecfdf5;
+      --wrong: #ef4444;
+      --wrong-bg: #fef2f2;
+      --border: #e2e8f0;
+      --timer-bg: #fee2e2;
+      --timer-text: #dc2626;
+      --tag-text: #4338ca;
+      --tag-bg: #e0e7ff;
+      --option-hover-bg: #e0e7ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 550px;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* Selector de Preguntas */
+    .selector-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      background-color: #f1f5f9;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .stepper button {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .stepper button:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    .stepper span {
+      font-size: 1.4rem;
+      font-weight: 600;
+      width: 70px;
+      text-align: center;
+    }
+
+    /* Botones generales */
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+      }
+    }
+
+    .btn-danger {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-danger:hover {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+    }
+
+    /* Interfaz de Juego */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+
+    .progress {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .timer-badge {
+      background-color: var(--timer-bg);
+      color: var(--timer-text);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #fca5a5;
+    }
+
+    .sentence-box {
+      text-align: center;
+      padding: 24px 16px;
+      background-color: #f8fafc;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sentence-en {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+      line-height: 1.4;
+    }
+
+    .sentence-es {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background-color: var(--option-hover-bg);
+      }
+    }
+
+    .option-btn .label {
+      font-weight: 700;
+      color: var(--tag-text);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background-color: var(--tag-bg);
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .option-btn.correct {
+      background-color: var(--correct-bg) !important;
+      border-color: var(--correct) !important;
+      color: #065f46 !important;
+    }
+
+    .option-btn.correct .label {
+      background-color: var(--correct);
+      color: white;
+    }
+
+    .option-btn.wrong {
+      background-color: var(--wrong-bg) !important;
+      border-color: var(--wrong) !important;
+      color: #991b1b !important;
+    }
+
+    .option-btn.wrong .label {
+      background-color: var(--wrong);
+      color: white;
+    }
+
+    .option-btn.blink-red {
+      animation: blinkRed 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRed {
+      0%, 100% {
+        background-color: #ffffff;
+        border-color: var(--border);
+        color: var(--text);
+      }
+      50% {
+        background-color: var(--wrong-bg);
+        border-color: var(--wrong);
+        color: #991b1b;
+      }
+    }
+
+    .option-btn.blink-red .label {
+      animation: blinkRedLabel 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRedLabel {
+      0%, 100% {
+        background-color: var(--tag-bg);
+        color: var(--tag-text);
+      }
+      50% {
+        background-color: var(--wrong);
+        color: white;
+      }
+    }
+
+    /* Pantalla Final */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .stat-card {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card.correct-card { border-color: #a7f3d0; background-color: #ecfdf5; }
+    .stat-card.wrong-card { border-color: #fca5a5; background-color: #fef2f2; }
+
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .correct-card .stat-value { color: var(--correct); }
+    .wrong-card .stat-value { color: var(--wrong); }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Lista de errores */
+    .wrong-list-container {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .wrong-item {
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.9rem;
+    }
+
+    .wrong-item-sentence {
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .wrong-item-translation {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 1. PANTALLA INICIAL -->
+    <div id="start-screen" class="screen active">
+      <h1>Fill in the Blank!</h1>
+      <p class="subtitle">✨ Completa la oración en inglés eligiendo la opción correcta ✨</p>
+      
+      <div class="selector-group">
+        <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">¿Cuántas preguntas deseas responder?</label>
+        <div class="stepper">
+          <button id="btn-minus">-</button>
+          <span id="question-count">10</span>
+          <button id="btn-plus">+</button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary">¡Comenzar Juego!</button>
+    </div>
+
+    <!-- 2. PANTALLA DEL JUEGO -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <span class="progress" id="progress-text">Pregunta 1 de 10</span>
+        <div class="timer-badge">⏱️ <span id="timer-text">35s</span></div>
+        <button id="finish-btn" class="btn-danger">Finalizar</button>
+      </div>
+
+      <div class="sentence-box">
+        <div class="sentence-en" id="sentence-en-display">She _____ to school every day.</div>
+        <div class="sentence-es" id="sentence-es-display">Ella va a la escuela todos los días.</div>
+      </div>
+
+      <div class="options-list" id="options-container">
+        <!-- Opciones a, b, c generadas con JS -->
+      </div>
+    </div>
+
+    <!-- 3. PANTALLA DE RESULTADOS -->
+    <div id="end-screen" class="screen">
+      <h1>¡Juego Terminado!</h1>
+      <p class="subtitle" id="final-status-text">Aquí tienes el resumen de tu partida:</p>
+
+      <div class="results-grid">
+        <div class="stat-card correct-card">
+          <div class="stat-value" id="correct-count">0</div>
+          <div class="stat-label">Correctas</div>
+        </div>
+        <div class="stat-card wrong-card">
+          <div class="stat-value" id="wrong-count">0</div>
+          <div class="stat-label">Incorrectas</div>
+        </div>
+      </div>
+
+      <!-- Sección de repaso -->
+      <div id="review-section" style="display: none;">
+        <h3 style="font-size: 1.1rem; color: var(--text); font-weight: 700; margin-bottom: 8px;">Sentences to reinforce:</h3>
+        <div class="wrong-list-container" id="wrong-list"></div>
+      </div>
+
+      <button id="restart-btn" class="btn-primary">Jugar de nuevo</button>
+    </div>
+  </div>
+
+  <script>
+    // Base de datos de Oraciones Avanzadas (C1 - C2)
+    const database = [
+      {
+        sentence: "Her nuanced argument _____ altered the panel's perspective.",
+        translation: "Su argumento matizado alteró profundamente la perspectiva del panel.",
+        answer: "profoundly",
+        options: ["profoundly", "subtly", "superficially"]
+      },
+      {
+        sentence: "The company meticulously _____ to the stringent regulatory framework.",
+        translation: "La empresa se adhirió meticulosamente al estricto marco regulatorio.",
+        answer: "adhered",
+        options: ["adhered", "defied", "objected"]
+      },
+      {
+        sentence: "He _____ complex technical concepts with utmost clarity.",
+        translation: "Él articula conceptos técnicos complejos con la máxima claridad.",
+        answer: "articulates",
+        options: ["articulates", "mumbles", "obscures"]
+      },
+      {
+        sentence: "We must critically _____ the underlying assumptions before proceeding.",
+        translation: "Debemos escudriñar críticamente los supuestos subyacentes antes de proceder.",
+        answer: "scrutinize",
+        options: ["scrutinize", "overlook", "discard"]
+      },
+      {
+        sentence: "Her eloquent discourse _____ deeply across the diverse audience.",
+        translation: "Su elocuente discurso resonó profundamente en la diversa audiencia.",
+        answer: "resonated",
+        options: ["resonated", "faltered", "dwindled"]
+      },
+      {
+        sentence: "The unprecedented economic downturn _____ widespread fiscal restructuring.",
+        translation: "La desaceleración económica sin precedentes desencadenó una reestructuración fiscal generalizada.",
+        answer: "triggered",
+        options: ["triggered", "prevented", "halted"]
+      },
+      {
+        sentence: "He possesses an _____ capacity for resolving volatile disputes.",
+        translation: "Él posee una capacidad innata para resolver disputas volátiles.",
+        answer: "innate",
+        options: ["innate", "acquired", "artificial"]
+      },
+      {
+        sentence: "They _____ perpetuated a deeply entrenched historical myth.",
+        translation: "Involuntariamente perpetuaron un mito histórico profundamente arraigado.",
+        answer: "unwittingly",
+        options: ["unwittingly", "deliberately", "consciously"]
+      },
+      {
+        sentence: "She demonstrated _____ resilience throughout the laborious process.",
+        translation: "Demostró una resiliencia sin igual a lo largo del laborioso proceso.",
+        answer: "unparalleled",
+        options: ["unparalleled", "ordinary", "mediocre"]
+      },
+      {
+        sentence: "The evidence _____ contradicts the initial scientific hypothesis.",
+        translation: "La evidencia contradice implícitamente la hipótesis científica inicial.",
+        answer: "implicitly",
+        options: ["implicitly", "explicitly", "barely"]
+      },
+      {
+        sentence: "He _____ disclosed sensitive parameters during the interview.",
+        translation: "Reveló inadvertidamente parámetros sensibles durante la entrevista.",
+        answer: "inadvertently",
+        options: ["inadvertently", "intentionally", "purposefully"]
+      },
+      {
+        sentence: "Such _____ market fluctuations require agile organizational strategies.",
+        translation: "Tales fluctuaciones volátiles del mercado requieren estrategias organizacionales ágiles.",
+        answer: "volatile",
+        options: ["volatile", "stable", "predictable"]
+      },
+      {
+        sentence: "She meticulously _____ the exhibition with paramount precision.",
+        translation: "Ella curó meticulosamente la exposición con suma precisión.",
+        answer: "curated",
+        options: ["curated", "neglected", "abandoned"]
+      },
+      {
+        sentence: "The treaty effectively _____ potential international legal disputes.",
+        translation: "El tratado elude eficazmente posibles disputas legales internacionales.",
+        answer: "circumvents",
+        options: ["circumvents", "encourages", "confronts"]
+      },
+      {
+        sentence: "His _____ influence is palpable throughout the organization.",
+        translation: "Su influencia ubicua es palpable en toda la organización.",
+        answer: "ubiquitous",
+        options: ["ubiquitous", "scarce", "isolated"]
+      },
+      {
+        sentence: "They embarked on an ambitious endeavor to _____ infrastructure.",
+        translation: "Se embarcaron en un ambicioso esfuerzo para reestructurar la infraestructura.",
+        answer: "overhaul",
+        options: ["overhaul", "demolish", "preserve"]
+      },
+      {
+        sentence: "She _____ synthesized the chaotic research into actionable steps.",
+        translation: "Sintetizó sucintamente la investigación caótica en pasos accionables.",
+        answer: "succinctly",
+        options: ["succinctly", "verbosely", "vaguely"]
+      },
+      {
+        sentence: "He displayed _____ reluctance when signing the binding agreement.",
+        translation: "Mostró una conspicua renuencia al firmar el acuerdo vinculante.",
+        answer: "conspicuous",
+        options: ["conspicuous", "hidden", "subtle"]
+      },
+      {
+        sentence: "The policy inadvertently _____ existing socio-economic disparities.",
+        translation: "La política exacerbó inadvertidamente las disparidades socioeconómicas existentes.",
+        answer: "exacerbated",
+        options: ["exacerbated", "mitigated", "alleviated"]
+      },
+      {
+        sentence: "We must _____ an environment conducive to innovation.",
+        translation: "Debemos fomentar un entorno propicio para la innovación.",
+        answer: "foster",
+        options: ["foster", "stifle", "suppress"]
+      },
+      {
+        sentence: "Her _____ concern remains the absolute security of data.",
+        translation: "Su primordial preocupación sigue siendo la seguridad absoluta de los datos.",
+        answer: "paramount",
+        options: ["paramount", "trivial", "secondary"]
+      },
+      {
+        sentence: "He handled the _____ negotiations with remarkable tact.",
+        translation: "Manejó las intrincadas negociaciones con un tacto notable.",
+        answer: "intricate",
+        options: ["intricate", "simple", "straightforward"]
+      },
+      {
+        sentence: "The software architecture exhibits exceptional _____ under load.",
+        translation: "La arquitectura del software exhibe una escalabilidad excepcional bajo carga.",
+        answer: "scalability",
+        options: ["scalability", "rigidity", "fragility"]
+      },
+      {
+        sentence: "She holds an _____ commitment to ethical leadership.",
+        translation: "Ella mantiene un compromiso inequívoco con el liderazgo ético.",
+        answer: "unequivocal",
+        options: ["unequivocal", "ambiguous", "hesitant"]
+      },
+      {
+        sentence: "They arrived at a consensus after _____ deliberation.",
+        translation: "Llegaron a un consenso tras una prolongada deliberación.",
+        answer: "protracted",
+        options: ["protracted", "brief", "hasty"]
+      },
+      {
+        sentence: "The _____ findings validate our initial speculative model.",
+        translation: "Los hallazgos empíricos validan nuestro modelo especulativo inicial.",
+        answer: "empirical",
+        options: ["empirical", "theoretical", "hypothetical"]
+      },
+      {
+        sentence: "He _____ incorporated feedback into the revised protocol.",
+        translation: "Incorporó sin problemas los comentarios en el protocolo revisado.",
+        answer: "seamlessly",
+        options: ["seamlessly", "clumsily", "partially"]
+      },
+      {
+        sentence: "Her insightful critique _____ the flawed theoretical construct.",
+        translation: "Su perspicaz crítica desmanteló la defectuosa construcción teórica.",
+        answer: "dismantled",
+        options: ["dismantled", "reinforced", "established"]
+      },
+      {
+        sentence: "The system encountered a subtle yet _____ anomaly.",
+        translation: "El sistema encontró una sutileza que resultó ser una anomalía catastrófica.",
+        answer: "catastrophic",
+        options: ["catastrophic", "beneficial", "trivial"]
+      },
+      {
+        sentence: "They sought to _____ the adverse effects immediately.",
+        translation: "Buscaron mitigar los efectos adversos de inmediato.",
+        answer: "mitigate",
+        options: ["mitigate", "amplify", "intensify"]
+      },
+      {
+        sentence: "He manifested an _____ disdain for bureaucratic inefficiencies.",
+        translation: "Manifestó un desdén abierto por las ineficiencias burocráticas.",
+        answer: "overt",
+        options: ["overt", "covert", "concealed"]
+      },
+      {
+        sentence: "The proposal lacks sufficient empirical _____ to succeed.",
+        translation: "La propuesta carece de suficiente respaldo empírico para tener éxito.",
+        answer: "backing",
+        options: ["backing", "opposition", "rejection"]
+      },
+      {
+        sentence: "She navigated the _____ political landscape with finesse.",
+        translation: "Navegó por el peligroso panorama político con sutileza.",
+        answer: "perilous",
+        options: ["perilous", "safe", "tranquil"]
+      },
+      {
+        sentence: "His rhetoric _____ manipulated public perception regarding taxes.",
+        translation: "Su retórica manipuló sutilmente la percepción pública respecto a los impuestos.",
+        answer: "subtly",
+        options: ["subtly", "openly", "clumsily"]
+      },
+      {
+        sentence: "The contract _____ prohibits unauthorized dissemination of intellectual property.",
+        translation: "El contrato prohíbe explícitamente la divulgación no autorizada de propiedad intelectual.",
+        answer: "explicitly",
+        options: ["explicitly", "vaguely", "implicitly"]
+      },
+      {
+        sentence: "We encountered an unprecedented _____ during deployment.",
+        translation: "Encontramos un dilema sin precedentes durante el despliegue.",
+        answer: "predicament",
+        options: ["predicament", "solution", "advantage"]
+      },
+      {
+        sentence: "She _____ the core principles of visionary design.",
+        translation: "Ella personifica los principios fundamentales del diseño visionario.",
+        answer: "epitomizes",
+        options: ["epitomizes", "contradicts", "rejects"]
+      },
+      {
+        sentence: "His _____ statement triggered widespread media speculation.",
+        translation: "Su declaración ambigua desató una gran especulación mediática.",
+        answer: "ambiguous",
+        options: ["ambiguous", "clear", "definitive"]
+      },
+      {
+        sentence: "They _____ a lucrative alliance amidst market volatility.",
+        translation: "Forjaron una alianza lucrativa en medio de la volatilidad del mercado.",
+        answer: "forged",
+        options: ["forged", "severed", "dismantled"]
+      },
+      {
+        sentence: "She retains a _____ grasp of quantum mechanics.",
+        translation: "Ella mantiene un dominio profundo de la mecánica cuántica.",
+        answer: "profound",
+        options: ["profound", "shallow", "superficial"]
+      },
+      {
+        sentence: "The research highlights a fundamental paradigm _____ worldwide.",
+        translation: "La investigación destaca un cambio de paradigma fundamental a nivel mundial.",
+        answer: "shift",
+        options: ["shift", "stagnation", "fixity"]
+      },
+      {
+        sentence: "He was thoroughly _____ by subsequent independent investigation.",
+        translation: "Fue completamente vindicado por la subsiguiente investigación independiente.",
+        answer: "vindicated",
+        options: ["vindicated", "condemned", "accused"]
+      },
+      {
+        sentence: "We observed a gradual _____ of performance over time.",
+        translation: "Observamos una degradación gradual del rendimiento con el tiempo.",
+        answer: "degradation",
+        options: ["degradation", "improvement", "enhancement"]
+      },
+      {
+        sentence: "Her _____ attention to detail ensures flawless execution.",
+        translation: "Su meticulosa atención al detalle garantiza una ejecución impecable.",
+        answer: "meticulous",
+        options: ["meticulous", "careless", "hasty"]
+      },
+      {
+        sentence: "The narrative _____ weaves fact with evocative fiction.",
+        translation: "La narrativa entreteje sin costuras la realidad con la ficción provocadora.",
+        answer: "seamlessly",
+        options: ["seamlessly", "roughly", "abruptly"]
+      },
+      {
+        sentence: "He holds an _____ optimistic outlook on life.",
+        translation: "Él mantiene una perspectiva intrínsecamente optimista sobre la vida.",
+        answer: "intrinsically",
+        options: ["intrinsically", "superficially", "externally"]
+      },
+      {
+        sentence: "The strategy effectively _____ synergistic interdepartmental capabilities.",
+        translation: "La estrategia aprovecha eficazmente las capacidades interdepartamentales sinérgicas.",
+        answer: "leverages",
+        options: ["leverages", "wastes", "disregards"]
+      },
+      {
+        sentence: "She faced severe adversity with _____ determination.",
+        translation: "Enfrentó una severa adversidad con una determinación inquebrantable.",
+        answer: "unfaltering",
+        options: ["unfaltering", "wavering", "hesitant"]
+      },
+      {
+        sentence: "They _____ audited the financial transactions for discrepancies.",
+        translation: "Auditaron meticulosamente las transacciones financieras en busca de discrepancias.",
+        answer: "meticulously",
+        options: ["meticulously", "hastily", "partially"]
+      },
+      {
+        sentence: "His persistent skepticism _____ collaborative project progress.",
+        translation: "Su escepticismo persistente obstaculizó el progreso colaborativo del proyecto.",
+        answer: "hindered",
+        options: ["hindered", "facilitated", "accelerated"]
+      },
+      {
+        sentence: "The phenomenon remains fundamentally _____ despite research.",
+        translation: "El fenómeno sigue siendo fundamentalmente enigmático a pesar de las investigaciones.",
+        answer: "enigmatic",
+        options: ["enigmatic", "obvious", "comprehensible"]
+      },
+      {
+        sentence: "She _____ defused the potentially explosive conversation.",
+        translation: "Ella desactivó hábilmente la conversación potencialmente explosiva.",
+        answer: "deftly",
+        options: ["deftly", "clumsily", "awkwardly"]
+      },
+      {
+        sentence: "We must _____ our consumption to prevent depletion.",
+        translation: "Debemos frenar nuestro consumo para prevenir el agotamiento.",
+        answer: "curb",
+        options: ["curb", "expand", "boost"]
+      },
+      {
+        sentence: "His artistic work _____ the prevailing cultural zeitgeist.",
+        translation: "Su obra artística encapsula el espíritu cultural predominante.",
+        answer: "encapsulates",
+        options: ["encapsulates", "distorts", "rejects"]
+      },
+      {
+        sentence: "The team established a highly _____ analytical framework.",
+        translation: "El equipo estableció un marco analítico highly sofisticado.",
+        answer: "sophisticated",
+        options: ["sophisticated", "rudimentary", "primitive"]
+      },
+      {
+        sentence: "She _____ profound reservations regarding the proposed strategy.",
+        translation: "Ella expresó profundas reservas respecto a la estrategia propuesta.",
+        answer: "voiced",
+        options: ["voiced", "suppressed", "concealed"]
+      },
+      {
+        sentence: "The decision _____ a detrimental impact on revenue.",
+        translation: "La decisión ejerció un impacto perjudicial en los ingresos.",
+        answer: "exerted",
+        options: ["exerted", "withheld", "absorbed"]
+      },
+      {
+        sentence: "He displays a _____ for taking calculated risks.",
+        translation: "Él muestra una inclinación por asumir riesgos calculados.",
+        answer: "penchant",
+        options: ["penchant", "aversion", "dislike"]
+      },
+      {
+        sentence: "The system maintains _____ backups to prevent downtime.",
+        translation: "El sistema mantiene respaldos redundantes para evitar interrupciones.",
+        answer: "redundant",
+        options: ["redundant", "insufficient", "singular"]
+      },
+      {
+        sentence: "She offered a _____ justification for the expenditure.",
+        translation: "Ella ofreció una justificación convincente para el gasto.",
+        answer: "compelling",
+        options: ["compelling", "unconvincing", "weak"]
+      },
+      {
+        sentence: "Their mutual animosity _____ any meaningful compromise.",
+        translation: "Su animosidad mutua frustró cualquier acuerdo significativo.",
+        answer: "thwarted",
+        options: ["thwarted", "fostered", "assisted"]
+      },
+      {
+        sentence: "He _____ the radical transformation of the department.",
+        translation: "Él lideró la transformación radical del departamento.",
+        answer: "spearheaded",
+        options: ["spearheaded", "opposed", "resisted"]
+      },
+      {
+        sentence: "The initiative aims to _____ endemic structural poverty.",
+        translation: "La iniciativa pretende aliviar la pobreza estructural endémica.",
+        answer: "alleviate",
+        options: ["alleviate", "worsen", "aggravate"]
+      },
+      {
+        sentence: "She delivered a remarkably _____ summary of events.",
+        translation: "Ella entregó un resumen de los hechos sorprendentemente lúcido.",
+        answer: "lucid",
+        options: ["lucid", "confusing", "vague"]
+      },
+      {
+        sentence: "The findings are _____ linked to economic policy.",
+        translation: "Los hallazgos están intrínsecamente vinculados a la política económica.",
+        answer: "intrinsically",
+        options: ["intrinsically", "loosely", "remotely"]
+      },
+      {
+        sentence: "He encountered _____ resistance from established stakeholders.",
+        translation: "Encontró una feroz resistencia por parte de los actores consolidados.",
+        answer: "fierce",
+        options: ["fierce", "mild", "gentle"]
+      },
+      {
+        sentence: "We must address this _____ issue systematically.",
+        translation: "Debemos abordar este problema omnipresente de manera sistemática.",
+        answer: "pervasive",
+        options: ["pervasive", "rare", "uncommon"]
+      },
+      {
+        sentence: "Her _____ integrity earned universal admiration across peers.",
+        translation: "Su inquebrantable integridad se ganó la admiración universal de sus pares.",
+        answer: "unwavering",
+        options: ["unwavering", "questionable", "fickle"]
+      },
+      {
+        sentence: "The document contained several _____ factual inconsistencies.",
+        translation: "El documento contenía varias inconsistencias fácticas evidentes.",
+        answer: "glaring",
+        options: ["glaring", "subtle", "hidden"]
+      },
+      {
+        sentence: "He masterfully _____ a comprehensive rebranding campaign.",
+        translation: "Él orquestó magistralmente una campaña integral de reposicionamiento.",
+        answer: "orchestrated",
+        options: ["orchestrated", "botched", "neglected"]
+      },
+      {
+        sentence: "The technological breakthrough rendered traditional methods _____.",
+        translation: "El avance tecnológico volvió obsoletos los métodos tradicionales.",
+        answer: "obsolete",
+        options: ["obsolete", "relevant", "essential"]
+      },
+      {
+        sentence: "She exhibited _____ empathy during the tragic crisis.",
+        translation: "Ella exhibió una profunda empatía durante la trágica crisis.",
+        answer: "profound",
+        options: ["profound", "superficial", "slight"]
+      },
+      {
+        sentence: "They operated under the _____ supervision of authorities.",
+        translation: "Operaban bajo la supervisión encubierta de las autoridades.",
+        answer: "covert",
+        options: ["covert", "overt", "public"]
+      },
+      {
+        sentence: "His hypothesis generated _____ debate among academic scholars.",
+        translation: "Su hipótesis generó un intenso debate entre los académicos.",
+        answer: "intense",
+        options: ["intense", "mild", "negligible"]
+      },
+      {
+        sentence: "We must carefully weigh the _____ tradeoffs involved.",
+        translation: "Debemos sopesar cuidadosamente las compensaciones implícitas involucradas.",
+        answer: "implicit",
+        options: ["implicit", "explicit", "obvious"]
+      },
+      {
+        sentence: "She effortlessly managed the _____ operational workload.",
+        translation: "Ella manejó sin esfuerzo la abrumadora carga de trabajo operativo.",
+        answer: "daunting",
+        options: ["daunting", "easy", "effortless"]
+      },
+      {
+        sentence: "The contract remains _____ upon mandatory regulatory approval.",
+        translation: "El contrato sigue sujeto a la aprobación regulatoria obligatoria.",
+        answer: "contingent",
+        options: ["contingent", "independent", "unconditional"]
+      },
+      {
+        sentence: "He expressed deep _____ for his reckless conduct.",
+        translation: "Él expresó un profundo remordimiento por su conducta imprudente.",
+        answer: "remorse",
+        options: ["remorse", "pride", "satisfaction"]
+      },
+      {
+        sentence: "The algorithm optimizes bandwidth utilization _____.",
+        translation: "El algoritmo optimiza el uso del ancho de banda de forma dinámica.",
+        answer: "dynamically",
+        options: ["dynamically", "statically", "rigidly"]
+      },
+      {
+        sentence: "She possesses an _____ ability to predict trends.",
+        translation: "Ella posee una capacidad asombrosa para predecir tendencias.",
+        answer: "uncanny",
+        options: ["uncanny", "ordinary", "predictable"]
+      },
+      {
+        sentence: "Their reckless expansion provoked immediate financial _____.",
+        translation: "Su expansión imprudente provocó un convulso caos financiero inmediato.",
+        answer: "turmoil",
+        options: ["turmoil", "stability", "harmony"]
+      },
+      {
+        sentence: "He challenged the deeply _____ dogma of management.",
+        translation: "Desafió el dogma profundamente arraigado de la gerencia.",
+        answer: "entrenched",
+        options: ["entrenched", "superficial", "transient"]
+      },
+      {
+        sentence: "The study illustrates the _____ of global ecosystems.",
+        translation: "El estudio ilustra la interconexión de los ecosistemas globales.",
+        answer: "interconnectedness",
+        options: ["interconnectedness", "isolation", "separation"]
+      },
+      {
+        sentence: "She maintains an _____ spotless professional record.",
+        translation: "Ella mantiene un historial profesional impecablemente limpio.",
+        answer: "impeccably",
+        options: ["impeccably", "partially", "flawfully"]
+      },
+      {
+        sentence: "They encountered an _____ legal hurdle during proceedings.",
+        translation: "Encontraron un obstáculo legal insuperable durante los procedimientos.",
+        answer: "insurmountable",
+        options: ["insurmountable", "surmountable", "minor"]
+      },
+      {
+        sentence: "His subtle satire exposed the _____ of political institutions.",
+        translation: "Su sátira sutil expuso la hipocresía de las instituciones políticas.",
+        answer: "hypocrisy",
+        options: ["hypocrisy", "sincerity", "honesty"]
+      },
+      {
+        sentence: "We must adopt a _____ stance toward cybersecurity.",
+        translation: "Debemos adoptar una postura proactiva hacia la ciberseguridad.",
+        answer: "proactive",
+        options: ["proactive", "reactive", "passive"]
+      },
+      {
+        sentence: "She offered an _____ observation regarding market behaviors.",
+        translation: "Ella ofreció una astuta observación respecto a los comportamientos del mercado.",
+        answer: "astute",
+        options: ["astute", "naive", "foolish"]
+      },
+      {
+        sentence: "The crisis _____ a complete overhaul of leadership.",
+        translation: "La crisis precipitó una reestructuración completa del liderazgo.",
+        answer: "precipitated",
+        options: ["precipitated", "delayed", "prevented"]
+      },
+      {
+        sentence: "He navigated the ethical dilemma with _____ principle.",
+        translation: "Navegó el dilema ético con un principio inquebrantable.",
+        answer: "unwavering",
+        options: ["unwavering", "flexible", "doubtful"]
+      },
+      {
+        sentence: "The software features an intuitively _____ user interface.",
+        translation: "El software cuenta con una interfaz de usuario intuitivamente fluida.",
+        answer: "seamless",
+        options: ["seamless", "clunky", "fragmented"]
+      },
+      {
+        sentence: "She delivered a _____ eulogy honoring her mentor.",
+        translation: "Ella pronunció un emotivo elogio fúnebre honrando a su mentor.",
+        answer: "poignant",
+        options: ["poignant", "dull", "emotionless"]
+      },
+      {
+        sentence: "They implemented _____ measures to safeguard data privacy.",
+        translation: "Implementaron medidas rigurosas para salvaguardar la privacidad de datos.",
+        answer: "rigorous",
+        options: ["rigorous", "lax", "careless"]
+      },
+      {
+        sentence: "His arrogant demeanor _____ potential business partners.",
+        translation: "Su conducta arrogante distanció a potenciales socios comerciales.",
+        answer: "alienated",
+        options: ["alienated", "attracted", "welcomed"]
+      },
+      {
+        sentence: "We cannot overlook the broader geopolitical _____.",
+        translation: "No podemos pasar por alto las ramificaciones geopolíticas más amplias.",
+        answer: "ramifications",
+        options: ["ramifications", "causes", "origins"]
+      },
+      {
+        sentence: "She demonstrated _____ mastery over advanced algorithms.",
+        translation: "Demostró un dominio sofisticado sobre algoritmos avanzados.",
+        answer: "sophisticated",
+        options: ["sophisticated", "basic", "rudimentary"]
+      },
+      {
+        sentence: "The report highlights widespread systemic institutional _____.",
+        translation: "El informe destaca un fallo institucional sistémico generalizado.",
+        answer: "failure",
+        options: ["failure", "success", "triumph"]
+      },
+      {
+        sentence: "He remains _____ in his pursuit of truth.",
+        translation: "Él permanece firme en su búsqueda de la verdad.",
+        answer: "steadfast",
+        options: ["steadfast", "wavering", "unsteady"]
+      },
+      {
+        sentence: "The discovery holds _____ implications for modern astrophysics.",
+        translation: "El descubrimiento tiene profundas implicaciones para la astrofísica moderna.",
+        answer: "profound",
+        options: ["profound", "trivial", "insignificant"]
+      },
+      {
+        sentence: "Mastery requires _____ dedication to deliberate practice.",
+        translation: "El dominio requiere una dedicación incansable a la práctica deliberada.",
+        answer: "relentless",
+        options: ["relentless", "sporadic", "half-hearted"]
+      }
+    ];
+
+    // Variables de estado
+    let targetQuestionCount = 10;
+    let selectedQuestions = [];
+    let wrongQuestions = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let isAnsweringAllowed = true;
+    let timerInterval = null;
+    let timeLeft = 35;
+
+    // DOM
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreen = document.getElementById('end-screen');
+
+    const questionCountDisplay = document.getElementById('question-count');
+    const btnMinus = document.getElementById('btn-minus');
+    const btnPlus = document.getElementById('btn-plus');
+    const startBtn = document.getElementById('start-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const restartBtn = document.getElementById('restart-btn');
+
+    const progressText = document.getElementById('progress-text');
+    const timerText = document.getElementById('timer-text');
+    const sentenceEnDisplay = document.getElementById('sentence-en-display');
+    const sentenceEsDisplay = document.getElementById('sentence-es-display');
+    const optionsContainer = document.getElementById('options-container');
+
+    const correctCountDisplay = document.getElementById('correct-count');
+    const wrongCountDisplay = document.getElementById('wrong-count');
+    const reviewSection = document.getElementById('review-section');
+    const wrongList = document.getElementById('wrong-list');
+
+    // Stepper de preguntas
+    btnMinus.addEventListener('click', () => {
+      if (targetQuestionCount > 5) {
+        targetQuestionCount -= 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    btnPlus.addEventListener('click', () => {
+      if (targetQuestionCount < 100) {
+        targetQuestionCount += 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    // Control de pantallas
+    startBtn.addEventListener('click', startGame);
+    finishBtn.addEventListener('click', endGame);
+    restartBtn.addEventListener('click', resetToStart);
+
+    function startGame() {
+      currentIndex = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      wrongQuestions = [];
+
+      const shuffled = [...database].sort(() => 0.5 - Math.random());
+      selectedQuestions = shuffled.slice(0, Math.min(targetQuestionCount, database.length));
+
+      startScreen.classList.remove('active');
+      gameScreen.classList.add('active');
+
+      renderQuestion();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 35;
+      timerText.textContent = `${timeLeft}s`;
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerText.textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      isAnsweringAllowed = true;
+      const currentQ = selectedQuestions[currentIndex];
+
+      progressText.textContent = `Pregunta ${currentIndex + 1} de ${selectedQuestions.length}`;
+      sentenceEnDisplay.textContent = currentQ.sentence;
+      sentenceEsDisplay.textContent = currentQ.translation;
+      optionsContainer.innerHTML = '';
+
+      // Desordenar las opciones
+      const shuffledOptions = [...currentQ.options].sort(() => 0.5 - Math.random());
+      const labels = ['a', 'b', 'c'];
+
+      shuffledOptions.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.classList.add('option-btn');
+        const isCorrect = optText === currentQ.answer;
+        btn.dataset.isCorrect = isCorrect;
+
+        btn.innerHTML = `
+          <span class="label">${labels[idx]}</span>
+          <span>${optText}</span>
+        `;
+
+        btn.addEventListener('click', () => handleAnswer(btn, isCorrect));
+        optionsContainer.appendChild(btn);
+      });
+
+      startTimer();
+    }
+
+    function handleAnswer(selectedBtn, isCorrect) {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+      clearInterval(timerInterval);
+
+      const currentQ = selectedQuestions[currentIndex];
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+      if (isCorrect) {
+        selectedBtn.classList.add('correct');
+        correctCount++;
+        // Rellenar la oración con la respuesta elegida
+        sentenceEnDisplay.textContent = currentQ.sentence.replace("_____", currentQ.answer);
+      } else {
+        selectedBtn.classList.add('wrong');
+        wrongCount++;
+        wrongQuestions.push(currentQ);
+
+        buttons.forEach(btn => {
+          if (btn.dataset.isCorrect === 'true') {
+            btn.classList.add('correct');
+          }
+        });
+      }
+
+      buttons.forEach(btn => btn.disabled = true);
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1200);
+    }
+
+    function handleTimeout() {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+
+      const currentQ = selectedQuestions[currentIndex];
+      wrongCount++;
+      wrongQuestions.push(currentQ);
+
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.isCorrect === 'true') {
+          btn.classList.add('blink-red');
+        }
+      });
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1200);
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      gameScreen.classList.remove('active');
+      endScreen.classList.add('active');
+
+      correctCountDisplay.textContent = correctCount;
+      wrongCountDisplay.textContent = wrongCount;
+
+      if (wrongQuestions.length > 0) {
+        reviewSection.style.display = 'block';
+        wrongList.innerHTML = wrongQuestions.map(item => `
+          <div class="wrong-item">
+            <span class="wrong-item-sentence">${item.sentence.replace("_____", `[${item.answer}]`)}</span>
+            <span class="wrong-item-translation">${item.translation}</span>
+          </div>
+        `).join('');
+      } else {
+        reviewSection.style.display = 'none';
+        wrongList.innerHTML = '';
+      }
+    }
+
+    function resetToStart() {
+      clearInterval(timerInterval);
+      endScreen.classList.remove('active');
+      startScreen.classList.add('active');
+    }
+  </script>
+
+  <!-- 1. SCRIPT DE ETIQUETA AUTO-INYECTADA CON EL NOMBRE DEL JUEGO -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const endScreen = document.getElementById("end-screen");
+      const title = endScreen ? endScreen.querySelector("h1") : null;
+
+      if (title) {
+        const gameBadge = document.createElement("span");
+        gameBadge.textContent = "Sentence Fill - Advanced";
+        
+        Object.assign(gameBadge.style, {
+          display: "inline-block",
+          alignSelf: "center",
+          backgroundColor: "var(--tag-bg, #e0e7ff)",
+          color: "var(--tag-text, #4338ca)",
+          fontWeight: "700",
+          fontSize: "0.85rem",
+          padding: "4px 12px",
+          borderRadius: "20px",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          marginTop: "8px",
+          marginBottom: "12px"
+        });
+
+        title.insertAdjacentElement("afterend", gameBadge);
+      }
+    });
+  </script>
+
+  <!-- 2. SCRIPT DE CAPTURA Y COMPARTIR LIMPIO -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const endScreen = document.getElementById("end-screen");
+      const restartBtn = document.getElementById("restart-btn");
+
+      if (endScreen && restartBtn) {
+        const shareBtn = document.createElement("button");
+        shareBtn.textContent = "📸 Guardar / Compartir";
+        shareBtn.className = "btn-primary";
+        
+        Object.assign(shareBtn.style, {
+          backgroundColor: "#2563eb",
+          marginTop: "10px"
+        });
+
+        restartBtn.parentNode.insertBefore(shareBtn, restartBtn);
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        shareBtn.addEventListener("click", async () => {
+          shareBtn.style.display = "none";
+          restartBtn.style.display = "none";
+
+          try {
+            const canvas = await html2canvas(document.querySelector(".container"), {
+              scale: 2,
+              backgroundColor: "#ffffff",
+              useCORS: true
+            });
+
+            shareBtn.style.display = "block";
+            restartBtn.style.display = "block";
+
+            if (isMobile && navigator.share && navigator.canShare) {
+              canvas.toBlob(async (blob) => {
+                if (!blob) throw new Error("No se pudo generar el blob");
+                const file = new File([blob], "mi-resultado.png", { type: "image/png" });
+
+                if (navigator.canShare({ files: [file] })) {
+                  await navigator.share({
+                    title: "¡Mi resultado!",
+                    text: "¡Mira cómo me fue en el juego!",
+                    files: [file]
+                  });
+                  return;
+                }
+                downloadImage(canvas);
+              }, "image/png");
+            } else {
+              downloadImage(canvas);
+            }
+          } catch (err) {
+            shareBtn.style.display = "block";
+            restartBtn.style.display = "block";
+            console.error("Error al procesar captura:", err);
+            alert("Ocurrió un error al generar la imagen.");
+          }
+        });
+
+        function downloadImage(canvas) {
+          const imageURI = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.download = "mi-resultado.png";
+          link.href = imageURI;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
